@@ -10,8 +10,16 @@
     "start": "cross-env NODE_ENV=development webpack serve",
     "test": "node src\\pages\\index\\generateImport.js > src\\pages\\index\\import.pug"
   },
-  "author": "ArhDemetriy",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArhDemetriy/webpak.git"
+  },
+  "author": "ArhDemetriy <ArhDemetriy@GMail.com>",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ArhDemetriy/webpak/issues"
+  },
+  "homepage": "https://github.com/ArhDemetriy/webpak#readme",
   "browserslist": "> 0.25%, not dead",
   "devDependencies": {
     "@babel/core": "^7.12.10",
