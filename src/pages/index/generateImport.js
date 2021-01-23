@@ -1,4 +1,4 @@
-(async (params) => {
+(async (startDirectory) => {
   // librares
   const path = require('path')
   const fs = require('fs')
@@ -38,7 +38,7 @@
       })
       .catch(err => err)
 
-  await parseImports(require(path.resolve(__dirname, 'import.json')))
+  await parseImports(require(path.resolve(startDirectory, 'import.json')))
   const simpleImportNameList = new Set()
   const checkSimpleImportNameList = Promise.all(Array.from(notCheckedSimpleImportNameList).map(name =>
     isExistsPromise(`${simplePath}/${name}`)
@@ -52,8 +52,13 @@
   await checkSimpleImportNameList;
   if (simpleImportNameList.size >= 1) {
     includePref = `${includeKeyword}/${simplePath}/`
-    console.log(includePref + Array.from(simpleImportNameList).join(`\n${includePref}`));}
-})()
+    console.log(includePref + Array.from(simpleImportNameList).join(`\n${includePref}`));
+  }
+  return {
+    simpleImportNameList,
+    complicatedImportNameList
+  }
+})(__dirname)
 
 
 
