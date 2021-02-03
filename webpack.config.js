@@ -98,6 +98,9 @@ module.exports = {
               root: path.resolve(__dirname, 'src')
             }
           },
+          path.resolve(__dirname, 'testLoader')
+
+
           // 'raw-loader',
           // 'html-loader',
           // 'pug-html-loader',
