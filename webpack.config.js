@@ -63,6 +63,7 @@ module.exports = {
     alias: {
       '@simple': path.resolve(__dirname, 'src/components/simple'),
       '@complicated': path.resolve(__dirname, 'src/components/complicated'),
+      '@components': path.resolve(__dirname, 'src/components'),
       '@layouts': path.resolve(__dirname, 'src/layouts'),
       '@pages': path.resolve(__dirname, 'src/pages'),
     },
@@ -95,15 +96,11 @@ module.exports = {
           {
             loader: 'pug-loader',
             options: {
-              root: path.resolve(__dirname, 'src')
+              root: path.resolve(__dirname, 'src'),
+              basedir: path.resolve(__dirname, 'src'),
             }
           },
-          path.resolve(__dirname, 'testLoader')
-
-
-          // 'raw-loader',
-          // 'html-loader',
-          // 'pug-html-loader',
+          path.resolve(__dirname, 'pug-auto-input-loader')
         ]
       },
       {

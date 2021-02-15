@@ -9,18 +9,19 @@ module.exports = function importsPug(startDirectory) {
   return separateImportNames(startDirectory)
     .then(nameLists => {
       let pugImports = ''
-      let includePref = '';
       if (nameLists.complicatedImportNameList.size >= 1) {
-        includePref = `${includeKeyword}/${complicatedPath}/`;
-        pugImports += includePref + Array.from(nameLists.complicatedImportNameList).join(`\n${includePref}`) + '\n';
+        const includePref = `${includeKeyword}/${complicatedPath}/`;
+        pugImports += Array.from(nameLists.complicatedImportNameList)
+          .reduce((fullImports, blockName) => `${fullImports}\n${includePref}${blockName}/${blockName}`, '')
       }
       if (nameLists.simpleImportNameList.size >= 1) {
-        includePref = `${includeKeyword}/${simplePath}/`;
-        pugImports += includePref + Array.from(nameLists.simpleImportNameList).join(`\n${includePref}`) + '\n';
+        const includePref = `${includeKeyword}/${simplePath}/`;
+        pugImports += Array.from(nameLists.simpleImportNameList)
+          .reduce((fullImports, blockName) => `${fullImports}\n${includePref}${blockName}/${blockName}`, '')
       }
       return pugImports;
     })
     .then(pugImports => fsPromises.writeFile(`${startDirectory}/import.pug`, pugImports))
-    .catch(e => console.log(e))
+    .catch(e => e)
 };
 
