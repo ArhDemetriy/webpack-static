@@ -100,7 +100,12 @@ module.exports = {
               basedir: path.resolve(__dirname, 'src'),
             }
           },
-          path.resolve(__dirname, 'pug-auto-input-loader')
+          {
+            loader: path.resolve(__dirname, 'pug-auto-input-loader'),
+            options: {
+              nameImportsFile: 'importsFile'
+            }
+          }
         ]
       },
       {
@@ -132,7 +137,6 @@ module.exports = {
           }
         }
       },
-
     ]
   }
 }

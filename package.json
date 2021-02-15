@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "webpack": "webpack",
-    "dev": "cross-env NODE_ENV=development webpack >temp.txt",
+    "dev": "cross-env NODE_ENV=development webpack >source.log",
     "prod": "cross-env NODE_ENV=production webpack",
     "start": "cross-env NODE_ENV=development webpack serve",
     "test": "node importsParser\\importsGenerate.js"
@@ -42,6 +42,8 @@
     "sass-loader": "^10.1.0",
     "style-loader": "^2.0.0",
     "terser-webpack-plugin": "^5.1.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.5",
     "webpack": "^5.11.1",
     "webpack-cli": "^4.3.1",
     "webpack-dev-server": "^3.11.2"
