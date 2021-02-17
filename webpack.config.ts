@@ -1,7 +1,7 @@
 /** @type {import('node')} */
+import {Configuration} from "webpack";
 
 import path = require('path')
-import webpack = require('webpack')
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import CopyWebpackPlugin = require('copy-webpack-plugin')
 import HTMLWebpackPlugin = require('html-webpack-plugin')
@@ -15,13 +15,13 @@ const mode = isDev => {
   return isDev ? 'development' : 'production'
 }
 const optimization = isDev => {
-  const config = {
+  const config: Configuration["optimization"]  = {
     splitChunks: {
       chunks: 'all'
     },
   }
   if (!isDev) {
-    (config as any).minimizer = [
+    config.minimizer = [
       new OptimizeCssAssetsWebpackPlugin(),
       new TerserWebpackPlugin(),
     ]
@@ -49,7 +49,7 @@ const cssLoaders = (extra?) => {
   return loaders
 }
 
-module.exports = {
+const webpackConfig : Configuration = {
   context: path.resolve(__dirname, 'src'),
   mode: mode(isDev),
   target: isDev ? "web" : "browserslist",
@@ -70,11 +70,6 @@ module.exports = {
     },
   },
   optimization: optimization(isDev),
-  devServer: {
-    port: 1234,
-    hot: isDev,
-    inline: true
-  },
   plugins: [
     // new webpack.HotModuleReplacementPlugin({}),
     new HTMLWebpackPlugin(HTMLWebpackPluginSetup('index')),
@@ -104,7 +99,8 @@ module.exports = {
           {
             loader: path.resolve(__dirname, 'auto-input-loader/pug-auto-input-loader.ts'),
             options: {
-              nameImportsFile: 'importsFile'
+              nameImportsFile: 'importsFile',
+              importGenerator: function (importPath) { return `include ${importPath}` }
             }
           }
         ]
@@ -141,3 +137,4 @@ module.exports = {
     ]
   }
 }
+export default webpackConfig

@@ -1,3 +1,4 @@
+/** @type {import('node')} */
 export async function separateImportNames(startDirectory) {
   // librares
   const path = require('path')

@@ -1,4 +1,6 @@
-const fsPromises = require('fs').promises
+/** @type {import('node')} */
+
+import {promises} from 'fs'
 import {separateImportNames} from './separateImportNames'
 const componentsPath = 'components';
 // folders path
@@ -21,7 +23,7 @@ export function importsPug(startDirectory: string) {
       }
       return pugImports;
     })
-    .then(pugImports => fsPromises.writeFile(`${startDirectory}/import.pug`, pugImports))
+    .then(pugImports => promises.writeFile(`${startDirectory}/import.pug`, pugImports))
     .catch(e => e)
 };
 
