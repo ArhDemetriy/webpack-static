@@ -1,4 +1,4 @@
-module.exports = async function separateImportNames(startDirectory) {
+export async function separateImportNames(startDirectory) {
   // librares
   const path = require('path')
   const fs = require('fs')
@@ -8,15 +8,15 @@ module.exports = async function separateImportNames(startDirectory) {
   const simplePath = `${componentsPath}/simple`
   const complicatedPath = `${componentsPath}/complicated`
   // lists for exist folder name
-  const notCheckedSimpleImportNameList = new Set()
-  const complicatedImportNameList = new Set()
+  const notCheckedSimpleImportNameList: Set<string> = new Set()
+  const complicatedImportNameList: Set<string> = new Set()
   const isExistsPromise = absolutePath =>
     fsPromises.access(path.resolve(`src/${absolutePath}`), fs.constants.F_OK);
 
   const parseImports = nameImports =>
     Promise.resolve(nameImports)
       .then(nameImports => {
-        const temp = new Set(nameImports);
+        const temp: Set<string> = new Set(nameImports);
         complicatedImportNameList.forEach(value => temp.delete(value));
         notCheckedSimpleImportNameList.forEach(value => temp.delete(value));
         if (temp.size <= 0) throw new Error('nameImports.size <= 0 or nameImports is not iterable');
@@ -38,7 +38,7 @@ module.exports = async function separateImportNames(startDirectory) {
       })
       .catch(err => err)
   const parseImportsPromise = parseImports(require(path.resolve(startDirectory, 'import.json')));
-  const simpleImportNameList = new Set()
+  const simpleImportNameList: Set<string> = new Set()
   parseImportsPromise
     .then(() => Promise.all(Array.from(notCheckedSimpleImportNameList).map(name =>
       isExistsPromise(`${simplePath}/${name}`)

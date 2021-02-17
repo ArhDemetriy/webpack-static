@@ -1,11 +1,11 @@
 const fsPromises = require('fs').promises
-const separateImportNames = require('./separateImportNames.js')
+import {separateImportNames} from './separateImportNames'
 const componentsPath = 'components';
 // folders path
 const simplePath = `${componentsPath}/simple`;
 const complicatedPath = `${componentsPath}/complicated`;
 const includeKeyword = 'include ';
-module.exports = function importsPug(startDirectory) {
+export function importsPug(startDirectory: string) {
   return separateImportNames(startDirectory)
     .then(nameLists => {
       let pugImports = ''

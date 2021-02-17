@@ -6,6 +6,7 @@
   "scripts": {
     "webpack": "webpack",
     "dev": "cross-env NODE_ENV=development webpack >source.log",
+    "tsdev": "cross-env NODE_ENV=development webpack --config webpack.config.ts",
     "prod": "cross-env NODE_ENV=production webpack",
     "start": "cross-env NODE_ENV=development webpack serve",
     "test": "node importsParser\\importsGenerate.js"
@@ -25,6 +26,8 @@
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-typescript": "^7.12.7",
+    "@types/jquery": "^3.5.5",
+    "@types/node": "^14.14.28",
     "@types/webpack": "^4.41.25",
     "babel-loader": "^8.2.2",
     "clean-webpack-plugin": "^3.0.0",
@@ -51,4 +54,5 @@
   "dependencies": {
     "@babel/polyfill": "^7.12.1"
   }
+
 }
