@@ -1,20 +1,21 @@
 /** @type {import('node')} */
+import path = require('path')
+import { constants as fsConstsnts, promises as fsPromises } from 'fs'
+
+const componentsPath = 'components'
+const simplePath = `${componentsPath}/simple`
+const complicatedPath = `${componentsPath}/complicated`
+
 export async function separateImportNames(startDirectory) {
-  // librares
-  const path = require('path')
-  const fs = require('fs')
-  const fsPromises = fs.promises
-  const componentsPath = 'components'
-  // folders path
-  const simplePath = `${componentsPath}/simple`
-  const complicatedPath = `${componentsPath}/complicated`
   // lists for exist folder name
   const notCheckedSimpleImportNameList: Set<string> = new Set()
   const complicatedImportNameList: Set<string> = new Set()
-  const isExistsPromise = absolutePath =>
-    fsPromises.access(path.resolve(`src/${absolutePath}`), fs.constants.F_OK);
+  const isExistsPromise = absolutePath =>{
+    return fsPromises.access(path.resolve(`src/${absolutePath}`), fsConstsnts.F_OK);
+  }
 
-  const parseImports = nameImports =>
+
+  const parseImports = (nameImports: string[]) =>
     Promise.resolve(nameImports)
       .then(nameImports => {
         const temp: Set<string> = new Set(nameImports);
@@ -35,17 +36,14 @@ export async function separateImportNames(startDirectory) {
           .catch(err => err)
         );
         return Promise.allSettled(temp);
-        // return temp
       })
       .catch(err => err)
-  const parseImportsPromise = parseImports(require(path.resolve(startDirectory, 'import.json')));
+  await parseImports(require(path.resolve(startDirectory, 'import.json')));
   const simpleImportNameList: Set<string> = new Set()
-  parseImportsPromise
-    .then(() => Promise.all(Array.from(notCheckedSimpleImportNameList).map(name =>
-      isExistsPromise(`${simplePath}/${name}`)
-        .then(simpleImportNameList.add(name), e => e))))
+  await Promise.allSettled(Array.from(notCheckedSimpleImportNameList).map(name => isExistsPromise(`${simplePath}/${name}`)
+    .then(exists => simpleImportNameList.add(name))))
     .catch(e => e);
-  await parseImportsPromise;
+
   return {
     simpleImportNameList,
     complicatedImportNameList
