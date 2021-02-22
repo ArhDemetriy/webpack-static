@@ -1,5 +1,5 @@
 /** @type {import('node')} */
-import { importsPug } from './auto-input-core/importGenerators/importsPug'
+import { importsPug } from './importsPug'
 
 type AutoInputOptions =
   {

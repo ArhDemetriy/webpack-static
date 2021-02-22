@@ -13,8 +13,6 @@ export async function separateImportNames(startDirectory) {
   const isExistsPromise = absolutePath =>{
     return fsPromises.access(path.resolve(`src/${absolutePath}`), fsConstsnts.F_OK);
   }
-
-
   const parseImports = (nameImports: string[]) =>
     Promise.resolve(nameImports)
       .then(nameImports => {
@@ -43,7 +41,6 @@ export async function separateImportNames(startDirectory) {
   await Promise.allSettled(Array.from(notCheckedSimpleImportNameList).map(name => isExistsPromise(`${simplePath}/${name}`)
     .then(exists => simpleImportNameList.add(name))))
     .catch(e => e);
-
   return {
     simpleImportNameList,
     complicatedImportNameList
