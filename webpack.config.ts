@@ -88,6 +88,12 @@ const webpackConfig : Configuration = {
     rules: [
       {
         test: /\.pug$/,
+        include: [
+          path.resolve(__dirname, "src/pages")
+        ],
+        exclude: [
+          s => path.basename(s, path.extname(s)) == 'import'
+        ],
         use: [
           {
             loader: 'pug-loader',
@@ -99,17 +105,35 @@ const webpackConfig : Configuration = {
           {
             loader: path.resolve(__dirname, 'auto-input-loader/pug-auto-input-loader.ts'),
             options: {
-              nameImportsFile: 'importsFile',
-              importGenerator: function (importPath) { return `include ${importPath}` }
+              importGenerator: function (importPath) { return `include ${importPath}` },
             }
           }
+        ]
+      },
+      {
+        test: /\.pug$/,
+        exclude: {
+          and: [
+            path.resolve(__dirname, "src/pages")
+          ],
+          not: [
+            s => path.basename(s, path.extname(s)) == 'import'
+          ]
+        },
+        use: [
+          {
+            loader: 'pug-loader',
+            options: {
+              root: path.resolve(__dirname, 'src'),
+              basedir: path.resolve(__dirname, 'src'),
+            }
+          },
         ]
       },
       {
         test: /\.css$/,
         use: cssLoaders(),
       },
-
       {
         test: /\.s[ac]ss$/,
         use: cssLoaders('sass-loader'),
