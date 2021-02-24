@@ -1,19 +1,13 @@
 /** @type {import('node')} */
+import { AutoInputOptions } from './types'
 import { importsPug } from './importsPug'
+import path from 'path'
 
-type AutoInputOptions =
-  {
-    importGenerator: (this: AutoInputOptions, importPath: string) => string,
-    extnameImportsFile: string,
-    basenameImportsFile: string,
-  }
-export {
-  AutoInputOptions
-}
 export default function (source) {
   const options: AutoInputOptions = Object.assign(
     {
-      importsFileBasename: `importsFile`,
+      basenameImportsFile: `importsFile`,
+      extnameImportsFile: path.extname(this.resourcePath),
       importGenerator: importPath => importPath,
     },
     this.loaders[this.loaderIndex].options

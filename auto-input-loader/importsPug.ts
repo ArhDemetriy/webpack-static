@@ -1,4 +1,5 @@
 /** @type {import('node')} */
+import { AutoInputOptions } from './types'
 import {promises} from 'fs'
 import {separateImportNames} from './separateImportNames'
 const componentsPath = 'components';
@@ -6,8 +7,8 @@ const componentsPath = 'components';
 const simplePath = `${componentsPath}/simple`;
 const complicatedPath = `${componentsPath}/complicated`;
 const includeKeyword = 'include ';
-export function importsPug(startDirectory: string) {
-  return separateImportNames(startDirectory)
+export function importsPug(startDirectory: string, options: AutoInputOptions) {
+  return separateImportNames(startDirectory, options)
     .then(nameLists => {
       let pugImports = ''
       if (nameLists.complicatedImportNameList.size >= 1) {
