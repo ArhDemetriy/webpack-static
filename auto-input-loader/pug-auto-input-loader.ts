@@ -1,7 +1,7 @@
 /** @type {import('node')} */
 import { AutoInputOptions } from './types'
 import { importsPug } from './importsPug'
-import path from 'path'
+import path = require('path')
 
 export default function (source) {
   const options: AutoInputOptions = Object.assign(
