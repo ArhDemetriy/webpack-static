@@ -1,5 +1,5 @@
-import { SettingsParserResolves } from './types'
-import { ParserResolves } from './ParserResolves'
+import { SettingsParserResolves } from '../types'
+import { ParserResolves } from '../ParserResolves'
 
 describe('ParserResolves class:', () => {
   describe('ParserResolves for empty settings:', () => {

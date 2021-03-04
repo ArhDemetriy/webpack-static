@@ -1,6 +1,6 @@
-import { SettingsParserResolves, ParserResolvesInterface, ImportNamesCollection, NamesList } from './types'
+import { SettingsParserResolves, InterfaceParserResolves, ImportNamesCollection, NamesList } from './types'
 
-class ParserResolves implements ParserResolvesInterface{
+class ParserResolves implements InterfaceParserResolves{
   protected readonly separateImportPaths: ImportNamesCollection = new Map()
   protected readonly sources: Array<string>
   constructor(settings: SettingsParserResolves) {

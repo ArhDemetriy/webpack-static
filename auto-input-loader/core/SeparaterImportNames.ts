@@ -1,30 +1,25 @@
-import { ImportNamesCollection } from './types'
+import { ImportNamesCollection, NamesList, InterfaceSeparaterImportNames, SettingsSeparaterImportNames } from './types'
 import path = require('path')
 import { constants as fsConstants, promises as fsPromises } from 'fs'
 
 
-class SeparaterImportNames{
+class SeparaterImportNames implements InterfaceSeparaterImportNames{
   protected readonly separateImportNames: ImportNamesCollection = new Map()
   protected readonly sources: string[];
   protected readonly importsFileName: string;
-  constructor(settings: { importsFileName: string, sources: string[], }) {
+  constructor(settings: SettingsSeparaterImportNames) {
     settings.sources.forEach(source => this.separateImportNames.set(source, new Set))
     this.sources = [].concat(settings.sources)
-    this.importsFileName = settings.importsFileName
+    this.importsFileName = path.basename(settings.importsFilePath)
   }
-
-  testMockPromise(absolutePath: string) {
-    return this.checkExistsPromise(absolutePath)
-  }
-  testMockSync(absolutePath: string) {
-    return this.getImportsFrom(absolutePath)
-  }
-
-  protected readonly checkExistsPromise = (absolutePath: string, fsConstant = fsConstants.F_OK) => {
+  protected checkExistsPromise(absolutePath: string, fsConstant = fsConstants.F_OK) {
     return fsPromises.access(path.resolve(`src/${absolutePath}`), fsConstant)
   }
-  protected readonly getImportsFrom = (absolutePath: string): string[] => {
+  protected getImportsFrom(absolutePath: string): string[] {
     return require(path.resolve(`src/${absolutePath}`))
+  }
+  getSeparateNames() {
+    return this.separateImportNames
   }
 }
 
