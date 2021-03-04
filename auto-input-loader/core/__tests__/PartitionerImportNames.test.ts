@@ -1,33 +1,33 @@
-import { SettingsSeparaterImportNames, ImportNamesCollection, NamesList } from '../types'
-import { SeparaterImportNames } from '../SeparaterImportNames'
-import { SeparaterImportNamesTestDate } from '../__mock__/SeparaterImportNames.test.date'
+import { SettingsPartitionerImportNames, ImportNamesCollection, NamesList } from '../types'
+import { PartitionerImportNames } from '../PartitionerImportNames'
+import { PartitionerImportNamesTestDate } from '../__mock__/PartitionerImportNames.test.date'
 
-describe('SeparaterImportNames class:', () => {
-  let separater: SeparaterImportNames
-  let dataForSeparater = new SeparaterImportNamesTestDate()
-  let separaterSettings: SettingsSeparaterImportNames = {
-    importsFilePath: `test/${dataForSeparater.importsFileName}`,
-    sources: dataForSeparater.sources,
+describe('PartitionerImportNames class:', () => {
+  let separater: PartitionerImportNames
+  let dataForPartitioner = new PartitionerImportNamesTestDate()
+  let separaterSettings: SettingsPartitionerImportNames = {
+    importsFilePath: `test/${dataForPartitioner.importsFileName}`,
+    sources: dataForPartitioner.sources,
   }
   beforeAll(() => {
-    separater = new SeparaterImportNames(separaterSettings);
+    separater = new PartitionerImportNames(separaterSettings);
     (function (this: typeof separater) {
       this.getImportsFrom = jest.fn(this.getImportsFrom)
         .mockImplementation(function (s: string) {
-          if (!dataForSeparater.requireMock.has(s))
+          if (!dataForPartitioner.requireMock.has(s))
             throw new Error('MOCK file not founded');
-          return dataForSeparater.requireMock.get(s)
+          return dataForPartitioner.requireMock.get(s)
         })
       this.checkExistsPromise = jest.fn(this.checkExistsPromise)
         .mockImplementation(function (s: string) {
-          if (dataForSeparater.fsMock.has(s))
+          if (dataForPartitioner.fsMock.has(s))
             return Promise.resolve()
           else
             return Promise.reject()
         })
     }).call(separater)
   })
-  it('shouldt toBe implements SeparaterImportNames', () => {
+  it('shouldt toBe implements PartitionerImportNames', () => {
     expect(separater).toBeDefined()
     expect(separater).toHaveProperty('getSeparateNames')
     expect(typeof separater.getSeparateNames).toBe('function')

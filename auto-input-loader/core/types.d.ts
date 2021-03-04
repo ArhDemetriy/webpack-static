@@ -1,10 +1,10 @@
 declare type NamesList = Set<string>
 declare type ImportNamesCollection = Map<string, NamesList>
-declare type SettingsSeparaterImportNames = {
+declare type SettingsPartitionerImportNames = {
   importsFilePath: string,
   sources: string[],
 }
-declare interface InterfaceSeparaterImportNames{
+declare interface InterfacePartitionerImportNames{
   getSeparateNames(): ImportNamesCollection,
 }
 declare type SettingsParserResolves = {
@@ -19,6 +19,6 @@ export {
   ImportNamesCollection,
   SettingsParserResolves,
   InterfaceParserResolves,
-  SettingsSeparaterImportNames,
-  InterfaceSeparaterImportNames,
+  SettingsPartitionerImportNames,
+  InterfacePartitionerImportNames,
 }

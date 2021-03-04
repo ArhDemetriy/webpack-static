@@ -23,7 +23,7 @@ const FileSistemShot = new Map([
     ])],
   // ['', new Set(['',])],
 ])
-class SeparaterImportNamesTestDate {
+class PartitionerImportNamesTestDate {
   importsFileName = importsFileName
   sources = [...FileSistemShot.keys()]
   fsMock = (fsMap => {
@@ -57,5 +57,5 @@ class SeparaterImportNamesTestDate {
   ])
 }
 export {
-  SeparaterImportNamesTestDate,
+  PartitionerImportNamesTestDate,
 }

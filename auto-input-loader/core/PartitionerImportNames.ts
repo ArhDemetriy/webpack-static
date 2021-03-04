@@ -1,13 +1,13 @@
-import { ImportNamesCollection, NamesList, InterfaceSeparaterImportNames, SettingsSeparaterImportNames } from './types'
+import { ImportNamesCollection, NamesList, InterfacePartitionerImportNames, SettingsPartitionerImportNames } from './types'
 import path = require('path')
 import { constants as fsConstants, promises as fsPromises } from 'fs'
 
 
-class SeparaterImportNames implements InterfaceSeparaterImportNames{
+class PartitionerImportNames implements InterfacePartitionerImportNames{
   protected readonly separateImportNames: ImportNamesCollection = new Map()
   protected readonly sources: string[];
   protected readonly importsFileName: string;
-  constructor(settings: SettingsSeparaterImportNames) {
+  constructor(settings: SettingsPartitionerImportNames) {
     settings.sources.forEach(source => this.separateImportNames.set(source, new Set))
     this.sources = [].concat(settings.sources)
     this.importsFileName = path.basename(settings.importsFilePath)
@@ -24,5 +24,5 @@ class SeparaterImportNames implements InterfaceSeparaterImportNames{
 }
 
 export {
-  SeparaterImportNames,
+  PartitionerImportNames,
 }
