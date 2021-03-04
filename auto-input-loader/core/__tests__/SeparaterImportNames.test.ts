@@ -1,4 +1,4 @@
-import { SeparaterImportNames } from './SeparaterImportNames'
+import { SeparaterImportNames } from '../SeparaterImportNames'
 import { SeparaterImportNamesTestDate } from './SeparaterImportNames.Test.date'
 import { promises as fsPromises } from 'fs'
 jest.mock('fs')
