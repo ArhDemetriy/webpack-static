@@ -2,13 +2,12 @@ import { ImportNamesCollection, NamesList, InterfacePartitionerImportNames, Sett
 import path = require('path')
 import { constants as fsConstants, promises as fsPromises } from 'fs'
 
-
 class PartitionerImportNames implements InterfacePartitionerImportNames{
-  protected readonly separateImportNames: ImportNamesCollection = new Map()
+  protected readonly partitionedImportNames: ImportNamesCollection = new Map()
   protected readonly sources: string[];
   protected readonly importsFileName: string;
   constructor(settings: SettingsPartitionerImportNames) {
-    settings.sources.forEach(source => this.separateImportNames.set(source, new Set))
+    settings.sources.forEach(source => this.partitionedImportNames.set(source, new Set))
     this.sources = [].concat(settings.sources)
     this.importsFileName = path.basename(settings.importsFilePath)
   }
@@ -18,8 +17,8 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
   protected getImportsFrom(absolutePath: string): string[] {
     return require(path.resolve(`src/${absolutePath}`))
   }
-  getSeparateNames() {
-    return this.separateImportNames
+  getPartitionedNames() {
+    return this.partitionedImportNames
   }
 }
 

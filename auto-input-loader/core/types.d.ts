@@ -5,13 +5,13 @@ declare type SettingsPartitionerImportNames = {
   sources: string[],
 }
 declare interface InterfacePartitionerImportNames{
-  getSeparateNames(): ImportNamesCollection,
+  getPartitionedNames(): ImportNamesCollection,
 }
 declare type SettingsParserResolves = {
   sources: string[]
 }
 declare interface InterfaceParserResolves{
-  getSeparatedPaths(): ImportNamesCollection,
+  getPartitionedPaths(): ImportNamesCollection,
   getPathsFrom(source: string): NamesList,
 }
 export {

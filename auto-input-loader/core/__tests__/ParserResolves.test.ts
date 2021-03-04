@@ -13,20 +13,20 @@ describe('ParserResolves class:', () => {
     test('shouldt create wisout settings', () => {
       expect(namesSeparator).toBeDefined()
     })
-    describe('getSeparatedPaths function:', () => {
+    describe('getPartitionedPaths function:', () => {
       test('shouldt toBe', () => {
-        expect(namesSeparator.getSeparatedPaths).toBeDefined()
+        expect(namesSeparator.getPartitionedPaths).toBeDefined()
       })
       test('shouldt return Map', () => {
-        expect(namesSeparator.getSeparatedPaths()).toHaveProperty('keys')
-        expect(namesSeparator.getSeparatedPaths()).toHaveProperty('size')
-        expect(namesSeparator.getSeparatedPaths().set).toBeDefined()
-        expect(namesSeparator.getSeparatedPaths().get).toBeDefined()
-        expect(namesSeparator.getSeparatedPaths().size).toBeDefined()
-        expect(namesSeparator.getSeparatedPaths().size).toBeGreaterThanOrEqual(0)
+        expect(namesSeparator.getPartitionedPaths()).toHaveProperty('keys')
+        expect(namesSeparator.getPartitionedPaths()).toHaveProperty('size')
+        expect(namesSeparator.getPartitionedPaths().set).toBeDefined()
+        expect(namesSeparator.getPartitionedPaths().get).toBeDefined()
+        expect(namesSeparator.getPartitionedPaths().size).toBeDefined()
+        expect(namesSeparator.getPartitionedPaths().size).toBeGreaterThanOrEqual(0)
       })
       test('shouldt return empty Map', () => {
-        expect(namesSeparator.getSeparatedPaths().size).toBe(0)
+        expect(namesSeparator.getPartitionedPaths().size).toBe(0)
       })
     })
     describe('getPathsFrom function:', () => {
@@ -46,12 +46,12 @@ describe('ParserResolves class:', () => {
     beforeAll(() => {
       namesSeparator = new ParserResolves(settings)
     })
-    describe('getSeparatedPaths function:', () => {
+    describe('getPartitionedPaths function:', () => {
       test('shouldt return Map size 1', () => {
-        expect(namesSeparator.getSeparatedPaths().size).toBe(1)
+        expect(namesSeparator.getPartitionedPaths().size).toBe(1)
       })
       test('shouldt return Map key = settings.sources', () => {
-        expect([...namesSeparator.getSeparatedPaths().keys()]).toEqual(settings.sources)
+        expect([...namesSeparator.getPartitionedPaths().keys()]).toEqual(settings.sources)
       })
     })
     describe('getPathsFrom function:', () => {

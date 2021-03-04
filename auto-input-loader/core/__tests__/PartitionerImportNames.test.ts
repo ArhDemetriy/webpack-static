@@ -3,15 +3,15 @@ import { PartitionerImportNames } from '../PartitionerImportNames'
 import { PartitionerImportNamesTestDate } from '../__mock__/PartitionerImportNames.test.date'
 
 describe('PartitionerImportNames class:', () => {
-  let separater: PartitionerImportNames
+  let partitioner: PartitionerImportNames
   let dataForPartitioner = new PartitionerImportNamesTestDate()
-  let separaterSettings: SettingsPartitionerImportNames = {
+  let partitionerSettings: SettingsPartitionerImportNames = {
     importsFilePath: `test/${dataForPartitioner.importsFileName}`,
     sources: dataForPartitioner.sources,
   }
   beforeAll(() => {
-    separater = new PartitionerImportNames(separaterSettings);
-    (function (this: typeof separater) {
+    partitioner = new PartitionerImportNames(partitionerSettings);
+    (function (this: typeof partitioner) {
       this.getImportsFrom = jest.fn(this.getImportsFrom)
         .mockImplementation(function (s: string) {
           if (!dataForPartitioner.requireMock.has(s))
@@ -25,34 +25,34 @@ describe('PartitionerImportNames class:', () => {
           else
             return Promise.reject()
         })
-    }).call(separater)
+    }).call(partitioner)
   })
   it('shouldt toBe implements PartitionerImportNames', () => {
-    expect(separater).toBeDefined()
-    expect(separater).toHaveProperty('getSeparateNames')
-    expect(typeof separater.getSeparateNames).toBe('function')
+    expect(partitioner).toBeDefined()
+    expect(partitioner).toHaveProperty('getPartitionedNames')
+    expect(typeof partitioner.getPartitionedNames).toBe('function')
   })
 
-  describe('getSeparateNames method:', () => {
+  describe('getPartitionedNames method:', () => {
     it('shouldt return map', () => {
-      const separateNames = separater.getSeparateNames()
-      expect(typeof separateNames).toBe('object')
-      expect(separateNames).toHaveProperty('size')
-      expect(separateNames).toHaveProperty('get')
-      expect(separateNames).toHaveProperty('set')
-      expect(separateNames).toHaveProperty('has')
+      const partitionedNames = partitioner.getPartitionedNames()
+      expect(typeof partitionedNames).toBe('object')
+      expect(partitionedNames).toHaveProperty('size')
+      expect(partitionedNames).toHaveProperty('get')
+      expect(partitionedNames).toHaveProperty('set')
+      expect(partitionedNames).toHaveProperty('has')
     })
     it('shouldt return not empty map', () => {
-      expect(separater.getSeparateNames().size).toBeGreaterThanOrEqual(0)
+      expect(partitioner.getPartitionedNames().size).toBeGreaterThanOrEqual(0)
     })
     it('shouldt return map consist value:Set<string>', () => {
-      const valuesOfSeparateNames = [...separater.getSeparateNames().values()]
-      expect(valuesOfSeparateNames.length).toBeGreaterThanOrEqual(0)
-      // expect(typeof valuesOfSeparateNames).toBe('object')
-      // expect(valuesOfSeparateNames).toHaveProperty('size')
-      // expect(valuesOfSeparateNames).toHaveProperty('get')
-      // expect(valuesOfSeparateNames).toHaveProperty('set')
-      // expect(valuesOfSeparateNames).toHaveProperty('has')
+      const valuesOfPartitionedNames = [...partitioner.getPartitionedNames().values()]
+      expect(valuesOfPartitionedNames.length).toBeGreaterThanOrEqual(0)
+      // expect(typeof valuesOfPartitionedNames).toBe('object')
+      // expect(valuesOfPartitionedNames).toHaveProperty('size')
+      // expect(valuesOfPartitionedNames).toHaveProperty('get')
+      // expect(valuesOfPartitionedNames).toHaveProperty('set')
+      // expect(valuesOfPartitionedNames).toHaveProperty('has')
     })
 
 
