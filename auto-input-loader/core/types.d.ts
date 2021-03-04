@@ -1,11 +1,15 @@
-declare type SettingsImportNamesSeparator = {
+declare type SettingsParserResolves = {
   sources: string[]
 }
-declare interface ImportNamesSeparatorInterface{
-  getSeparateImportNames(): Map<string, Set<string>>,
-  getImportsNamesFrom(source: string): Set<string>,
+declare type NamesList = Set<string>
+declare type ImportNamesCollection = Map<string,NamesList>
+declare interface ParserResolvesInterface{
+  getSeparatedPaths(): ImportNamesCollection,
+  getPathsFrom(source: string): NamesList,
 }
 export {
-  SettingsImportNamesSeparator,
-  ImportNamesSeparatorInterface,
+  SettingsParserResolves,
+  ParserResolvesInterface,
+  ImportNamesCollection,
+  NamesList,
 }
