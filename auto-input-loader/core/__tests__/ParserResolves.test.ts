@@ -3,66 +3,66 @@ import { ParserResolves } from '../ParserResolves'
 
 describe('ParserResolves class:', () => {
   describe('ParserResolves for empty settings:', () => {
-    let namesSeparator: ParserResolves
+    let namesPartitioner: ParserResolves
     const settings: SettingsParserResolves = {
       sources: [],
     }
     beforeAll(() => {
-      namesSeparator = new ParserResolves(settings)
+      namesPartitioner = new ParserResolves(settings)
     })
     test('shouldt create wisout settings', () => {
-      expect(namesSeparator).toBeDefined()
+      expect(namesPartitioner).toBeDefined()
     })
     describe('getPartitionedPaths function:', () => {
       test('shouldt toBe', () => {
-        expect(namesSeparator.getPartitionedPaths).toBeDefined()
+        expect(namesPartitioner.getPartitionedPaths).toBeDefined()
       })
       test('shouldt return Map', () => {
-        expect(namesSeparator.getPartitionedPaths()).toHaveProperty('keys')
-        expect(namesSeparator.getPartitionedPaths()).toHaveProperty('size')
-        expect(namesSeparator.getPartitionedPaths().set).toBeDefined()
-        expect(namesSeparator.getPartitionedPaths().get).toBeDefined()
-        expect(namesSeparator.getPartitionedPaths().size).toBeDefined()
-        expect(namesSeparator.getPartitionedPaths().size).toBeGreaterThanOrEqual(0)
+        expect(namesPartitioner.getPartitionedPaths()).toHaveProperty('keys')
+        expect(namesPartitioner.getPartitionedPaths()).toHaveProperty('size')
+        expect(namesPartitioner.getPartitionedPaths().set).toBeDefined()
+        expect(namesPartitioner.getPartitionedPaths().get).toBeDefined()
+        expect(namesPartitioner.getPartitionedPaths().size).toBeDefined()
+        expect(namesPartitioner.getPartitionedPaths().size).toBeGreaterThanOrEqual(0)
       })
       test('shouldt return empty Map', () => {
-        expect(namesSeparator.getPartitionedPaths().size).toBe(0)
+        expect(namesPartitioner.getPartitionedPaths().size).toBe(0)
       })
     })
     describe('getPathsFrom function:', () => {
       test('shouldt toBe', () => {
-        expect(namesSeparator.getPathsFrom).toBeDefined()
+        expect(namesPartitioner.getPathsFrom).toBeDefined()
       })
       test('shouldt return undefined', () => {
-        expect(namesSeparator.getPathsFrom('asny')).toBeUndefined()
+        expect(namesPartitioner.getPathsFrom('asny')).toBeUndefined()
       })
     })
   })
   describe('ParserResolves wis settings:', () => {
-    let namesSeparator: ParserResolves
+    let namesPartitioner: ParserResolves
     const settings: SettingsParserResolves = {
       sources: ['qwe'],
     }
     beforeAll(() => {
-      namesSeparator = new ParserResolves(settings)
+      namesPartitioner = new ParserResolves(settings)
     })
     describe('getPartitionedPaths function:', () => {
       test('shouldt return Map size 1', () => {
-        expect(namesSeparator.getPartitionedPaths().size).toBe(1)
+        expect(namesPartitioner.getPartitionedPaths().size).toBe(1)
       })
       test('shouldt return Map key = settings.sources', () => {
-        expect([...namesSeparator.getPartitionedPaths().keys()]).toEqual(settings.sources)
+        expect([...namesPartitioner.getPartitionedPaths().keys()]).toEqual(settings.sources)
       })
     })
     describe('getPathsFrom function:', () => {
       test('shouldt toBe', () => {
-        expect(namesSeparator.getPathsFrom).toBeDefined()
+        expect(namesPartitioner.getPathsFrom).toBeDefined()
       })
       test('shouldt return undefined for incorrect input', () => {
-        expect(namesSeparator.getPathsFrom('asny')).toBeUndefined()
+        expect(namesPartitioner.getPathsFrom('asny')).toBeUndefined()
       })
       test('shouldt return set for correct input', () => {
-        const names = namesSeparator.getPathsFrom(settings.sources[Math.round(Math.random() * (settings.sources.length - 1))])
+        const names = namesPartitioner.getPathsFrom(settings.sources[Math.round(Math.random() * (settings.sources.length - 1))])
         expect(names).toBeDefined()
         expect(names).toHaveProperty(['size'], 0)
       })
