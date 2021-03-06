@@ -10,6 +10,7 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     settings.sources.forEach(source => this.partitionedImportNames.set(source, new Set))
     this.sources = [].concat(settings.sources)
     this.importsFileName = path.basename(settings.importsFilePath)
+    this.fierstStep(settings.importsFilePath)
   }
   protected checkExistsPromise(absolutePath: string, fsConstant = fsConstants.F_OK) {
     return fsPromises.access(path.resolve(`src/${absolutePath}`), fsConstant)
@@ -17,11 +18,13 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
   protected getImportsFrom(absolutePath: string): string[] {
     return require(path.resolve(`src/${absolutePath}`))
   }
+  protected fierstStep(importsFilePath: string) {
+    return this.getImportsFrom(importsFilePath)
+  }
   getPartitionedNames() {
     return this.partitionedImportNames
   }
 }
-
 export {
   PartitionerImportNames,
 }
