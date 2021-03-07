@@ -1,24 +1,35 @@
 import { SettingsPartitionerImportNames, ImportNamesCollection, NamesList } from '../types'
 import { PartitionerImportNames } from '../__mock__/PartitionerImportNames'
 import { PartitionerImportNamesTestDate } from '../__mock__/PartitionerImportNames.test.date'
-describe('PartitionerImportNames class:', () => {
-  let partitioner: PartitionerImportNames
-  let dataForPartitioner : PartitionerImportNamesTestDate
-  let partitionerSettings: SettingsPartitionerImportNames;
-  beforeAll(() => {
-    jest.clearAllMocks()
-    dataForPartitioner = new PartitionerImportNamesTestDate()
-    partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings()
-  })
-  beforeEach(() => {
-    partitioner = new PartitionerImportNames(partitionerSettings)
-  })
-  afterEach(function (this: typeof partitioner) {
-    jest.clearAllMocks()
+describe.only('PartitionerImportNames class:', () => {
+  let dataForPartitioner = new PartitionerImportNamesTestDate()
+  let partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings()
+  let partitioner = new PartitionerImportNames(partitionerSettings)
+
+  describe('check mock implementations:', function(){
+    describe('getImportsFrom method:', function (this: typeof partitioner) {
+      it.each([...dataForPartitioner.requireMock.entries()])
+        ('shouldt return string[] for correct path', (importsPath, requireMock) => {
+        expect(partitioner.getImportsFrom(importsPath)).toEqual(requireMock)
+      })
+      it('shouldt trow for incorrect path', () => {
+        expect(()=>partitioner.getImportsFrom('asdafgsg')).toThrow('MOCK file not founded')
+      })
+    })
+    describe('checkExistsPromise method:', function (this: typeof partitioner) {
+      it.each([...dataForPartitioner.fsMock.values()])
+        ('shouldt resolves for correct path', (importsPath) => {
+          return expect(partitioner.checkExistsPromise(importsPath)).resolves.toBeUndefined()
+        })
+      it('shouldt rejectes for incorrect path', () => {
+        return expect(partitioner.checkExistsPromise('asdwq')).rejects.toBeUndefined()
+      })
+    })
   })
 })
 
 describe('PartitionerImportNames class it ones created:', () => {
+  expect(123).toBe(123)
   let partitioner: PartitionerImportNames
   let dataForPartitioner = new PartitionerImportNamesTestDate()
   let partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings();
