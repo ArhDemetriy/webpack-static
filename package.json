@@ -9,8 +9,8 @@
     "tsdev": "cross-env NODE_ENV=development webpack --config webpack.config.ts",
     "prod": "cross-env NODE_ENV=production webpack",
     "start": "cross-env NODE_ENV=development webpack serve",
-    "test": "jest --coverage --watch",
-    "testAll": "jest --coverage"
+    "testWatch": "jest --watch",
+    "test": "jest auto-input-loader/core/__tests__/PartitionerImportNames.test.ts"
   },
   "repository": {
     "type": "git",
