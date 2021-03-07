@@ -1,7 +1,10 @@
 import { ImportNamesCollection, NamesList, InterfacePartitionerImportNames, SettingsPartitionerImportNames } from './types'
 import path = require('path')
 import { constants as fsConstants, promises as fsPromises } from 'fs'
-
+type PartitionSearchingResults = {
+  exists: Set<string>,
+  notExists: Set<string>
+}
 class PartitionerImportNames implements InterfacePartitionerImportNames{
   protected readonly partitionedImportNames: ImportNamesCollection = new Map()
   protected readonly sources: string[];
@@ -12,6 +15,9 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     this.importsFileName = path.basename(settings.importsFilePath)
     this.fierstStep(settings.importsFilePath)
   }
+  getPartitionedNames() {
+    return this.partitionedImportNames
+  }
   protected checkExistsPromise(absolutePath: string, fsConstant = fsConstants.F_OK) {
     return fsPromises.access(path.resolve(`src/${absolutePath}`), fsConstant)
   }
@@ -21,8 +27,22 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
   protected fierstStep(importsFilePath: string) {
     return this.getImportsFrom(importsFilePath)
   }
-  getPartitionedNames() {
-    return this.partitionedImportNames
+  protected async partitionBlocksFromPath(source: string, searcheableBlocks: Set<string>) {
+    const searchers: Promise<string>[] = []
+    searcheableBlocks.forEach(block => {
+      const promise = this.checkExistsPromise(path.resolve(source, block))
+        .then(() => block, () => block)
+      searchers.push(promise)
+    })
+    const searchingResults = await Promise.allSettled(searchers)
+    const partitionSearchingResults = searchingResults.reduce((aggregator, searchingResult) => {
+      if (searchingResult.status == 'fulfilled')
+        aggregator.exists.add(searchingResult.value)
+      else
+        aggregator.notExists.add(searchingResult.reason)
+      return aggregator;
+    }, { exists: new Set(), notExists: new Set() } as PartitionSearchingResults)
+    return partitionSearchingResults
   }
 }
 export {

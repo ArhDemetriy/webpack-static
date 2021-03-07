@@ -25,6 +25,20 @@ describe.only('PartitionerImportNames class:', () => {
         return expect(partitioner.checkExistsPromise('asdwq')).rejects.toBeUndefined()
       })
     })
+    const q = ((sources) => { })(partitionerSettings.sources,);
+
+    describe.each(partitionerSettings.sources)('from:\n%s', (source) => {
+      describe.each([...dataForPartitioner.requireMock.values()])
+        ('partitionBlocksFromPath method:', function (this: typeof partitioner, ...requires) {
+          const requiresSet = new Set(requires)
+          it.skip('shouldt not return Promise.reject', () => {
+            // return expect(partitioner.partitionBlocksFromPath(source, requires)).resolves
+          })
+          it('shouldt return Promise.resolve<{exists, notExists: string[]}>', () => {
+            return expect(partitioner.partitionBlocksFromPath(source, requiresSet)).resolves.toBeDefined()
+          })
+        })
+    })
   })
 })
 
