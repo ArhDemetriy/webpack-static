@@ -1,10 +1,6 @@
 import { ImportNamesCollection, NamesList, InterfacePartitionerImportNames, SettingsPartitionerImportNames } from './types'
 import path = require('path')
 import { constants as fsConstants, promises as fsPromises } from 'fs'
-type PartitionSearchingResults = {
-  exists: Set<string>,
-  notExists: Set<string>
-}
 class PartitionerImportNames implements InterfacePartitionerImportNames{
   protected readonly partitionedImportNames: ImportNamesCollection = new Map()
   protected readonly sources: string[];
@@ -31,17 +27,17 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     const searchers: Promise<string>[] = []
     searcheableBlocks.forEach(block => {
       const promise = this.checkExistsPromise(path.resolve(source, block))
-        .then(() => block, () => block)
+        .then(() => block, () => Promise.reject(block))
       searchers.push(promise)
     })
     const searchingResults = await Promise.allSettled(searchers)
     const partitionSearchingResults = searchingResults.reduce((aggregator, searchingResult) => {
       if (searchingResult.status == 'fulfilled')
-        aggregator.exists.add(searchingResult.value)
+        aggregator.exists.push(searchingResult.value)
       else
-        aggregator.notExists.add(searchingResult.reason)
+        aggregator.notExists.push(searchingResult.reason)
       return aggregator;
-    }, { exists: new Set(), notExists: new Set() } as PartitionSearchingResults)
+    }, { exists: [] as string[], notExists: [] as string[] })
     return partitionSearchingResults
   }
 }
