@@ -72,19 +72,29 @@ describe('PartitionerImportNames class:', () => {
             it('CalledWith == requiresSet', async () => {
               await partitioner.partitionBlocksFromPath(source, new Set(requires))
               for (const req of requires.map(req => path.resolve(source, req))) {
-                expect(partitioner.checkExistsPromise).toBeCalledWith(req)
+                expect(partitioner.checkExistsPromise).toBeCalledWith(req, expect.any(Number))
               }
             })
-
           })
-
         })
     })
   })
-
-
+  describe.only('getAdditionalImports method:', function (this: typeof partitioner) {
+    it('shouldt toBe', () => {
+      expect(partitioner.getAdditionalImports).toBeDefined()
+    })
+    it('shouldt return string[]', () => {
+      expect(partitioner.getAdditionalImports('kkdtfh', ['jdjdjg', 'hdsdf'])).toEqual(expect.any(Array))
+    })
+    it('shouldt call partitionBlocksFromPath selfInputs', () => {
+      jest.clearAllMocks()
+      const searcheableBlocks = ['jdjdjg', 'hdsdf']
+      const searcheableFiles = searcheableBlocks.map(block => path.join(block, path.basename(partitionerSettings.importsFilePath)))
+      expect(partitioner.getAdditionalImports('kkdtfh', searcheableBlocks)).toEqual(expect.any(Array))
+      expect(partitioner.partitionBlocksFromPath).toBeCalledWith('kkdtfh', new Set(searcheableFiles), expect.any(Number))
+    })
+  })
 })
-
 
 describe('PartitionerImportNames class it ones created:', () => {
   let partitioner: PartitionerImportNames

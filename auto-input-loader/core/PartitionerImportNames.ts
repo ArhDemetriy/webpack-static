@@ -15,18 +15,18 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     return this.partitionedImportNames
   }
   protected checkExistsPromise(absolutePath: string, fsConstant = fsConstants.F_OK) {
-    return fsPromises.access(path.resolve(`src/${absolutePath}`), fsConstant)
+    return fsPromises.access(path.resolve(`${absolutePath}`), fsConstant)
   }
   protected getImportsFrom(absolutePath: string): string[] {
-    return require(path.resolve(`src/${absolutePath}`))
+    return require(path.resolve(`${absolutePath}`))
   }
   protected fierstStep(importsFilePath: string) {
     return this.getImportsFrom(importsFilePath)
   }
-  protected async partitionBlocksFromPath(source: string, searcheableBlocks: Set<string>) {
+  protected async partitionBlocksFromPath(source: string, searcheableBlocks: Set<string>, fsConstant = fsConstants.F_OK) {
     const searchers: Promise<string>[] = []
     searcheableBlocks.forEach(block => {
-      const promise = this.checkExistsPromise(path.resolve(source, block))
+      const promise = this.checkExistsPromise(path.resolve(source, block), fsConstant)
         .then(() => block, () => Promise.reject(block))
       searchers.push(promise)
     })
@@ -39,6 +39,12 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
       return aggregator;
     }, { exists: [] as string[], notExists: [] as string[] })
     return partitionSearchingResults
+  }
+  protected getAdditionalImports(source: string, searcheableBlocks: string[]) {
+    const searcheableFiles = new Set(searcheableBlocks.map(block => path.join(block, this.importsFileName)))
+    this.partitionBlocksFromPath(source, searcheableFiles, fsConstants.R_OK)
+    const result = [] as string[]
+    return result
   }
 }
 export {
