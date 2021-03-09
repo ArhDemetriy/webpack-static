@@ -1,7 +1,9 @@
+import path = require('path')
+import { pathToFileURL } from 'url'
 const importsFileName = 'import.json'
 const FileSistemShot = new Map([
   ['src/components/complicated',
-    new Set([
+    [
       'complicated_and_simple_import',
       `complicated_and_simple_import/${importsFileName}`,
       'not_use_complicated',
@@ -12,9 +14,9 @@ const FileSistemShot = new Map([
       `unical_complicated_import/${importsFileName}`,
       'not_fierst_import',
       `not_fierst_import/${importsFileName}`,
-    ])],
+    ]],
   ['src/components/simple',
-    new Set([
+    [
       'base',
       'base1',
       'base2',
@@ -22,51 +24,36 @@ const FileSistemShot = new Map([
       'base4',
       'text',
       'text2',
-    ])],
+    ]],
   // ['', new Set(['',])],
 ])
-class PartitionerImportNamesTestDate {
-  importsFileName = importsFileName
-  static partitionerSettings() {
-    return {
-      importsFilePath: `test/${importsFileName}`,
-      sources: [...FileSistemShot.keys()]
-    }
-  }
-  fsMock = (fsMap => {
-    const fsMock: Set<string> = new Set()
-    fsMap.forEach((value, key) => {
-      value.forEach(element => fsMock.add(`${key}/${element}`))
-    })
-    return fsMock
-  })(FileSistemShot)
-  requireMock = new Map([
-    [`src/components/complicated/complicated_and_simple_import/${this.importsFileName}`,
-      [
-        'only_simple_import',
-        'base2',
-      ]],
-    [`src/components/complicated/not_use_complicated/${this.importsFileName}`,
-      [
-        'base4',
-        'only_simple_import',
-      ]],
-    [`src/components/complicated/only_simple_import/${this.importsFileName}`,
-      [
-        'base',
-        'base3',
-      ]],
-    [`src/components/complicated/unical_complicated_import/${this.importsFileName}`,
-      [
-        'not_fierst_import',
-        'base',
-      ]],
-    [`src/components/complicated/not_fierst_import/${this.importsFileName}`,
-      [
-        'complicated_and_simple_import',
-        'base',
-      ]],
-    [PartitionerImportNamesTestDate.partitionerSettings().importsFilePath,
+const requires = new Map([
+  [`src/components/complicated/complicated_and_simple_import/${importsFileName}`,
+    [
+      'only_simple_import',
+      'base2',
+    ]],
+  [`src/components/complicated/not_use_complicated/${importsFileName}`,
+    [
+      'base4',
+      'only_simple_import',
+    ]],
+  [`src/components/complicated/only_simple_import/${importsFileName}`,
+    [
+      'base',
+      'base3',
+    ]],
+  [`src/components/complicated/unical_complicated_import/${importsFileName}`,
+    [
+      'not_fierst_import',
+      'base',
+    ]],
+  [`src/components/complicated/not_fierst_import/${importsFileName}`,
+    [
+      'complicated_and_simple_import',
+      'base',
+    ]],
+  [`test/${importsFileName}`,
       [
         'complicated_and_simple_import',
         'only_simple_import',
@@ -74,8 +61,23 @@ class PartitionerImportNamesTestDate {
         'text2',
         'base2',
       ]]
-  ])
-  resultsMock = new Map([
+  // ['',
+  //   [
+  //     '',
+  //   ]],
+])
+class PartitionerImportNamesTestDate {
+  importsFileName = importsFileName
+  static partitionerSettings() {
+    return {
+      importsFilePath: path.resolve(`test/${importsFileName}`),
+      sources: [...FileSistemShot.keys()]
+    }
+  }
+  fileSistemShot = FileSistemShot
+  fsMock = this.pather(FileSistemShot)
+  requireMock = this.oneRancPather(requires)
+  resultsMock = this.oneRancPather(new Map([
     ['src/components/complicated',
       [
         'complicated_and_simple_import',
@@ -90,8 +92,8 @@ class PartitionerImportNamesTestDate {
         'base3',
         'text2',
       ]]
-  ])
-  resultsExcludesMock = new Map([
+  ]))
+  resultsExcludesMock = this.oneRancPather(new Map([
     ['src/components/complicated',
       [
         'not_use_complicated',
@@ -102,7 +104,21 @@ class PartitionerImportNamesTestDate {
         'base4',
         'text',
       ]]
-  ])
+  ]))
+  private pather(fsMap: Map<string, string[]>): Set<string> {
+    const fsMock: Set<string> = new Set()
+    fsMap.forEach((value, key) => {
+      value.forEach(element => fsMock.add(path.resolve(key, element)))
+    })
+    return fsMock
+  }
+  private oneRancPather(fsMap: Map<string, string[]>): Map<string, string[]>{
+    const fsMock: Map<string, string[]> = new Map()
+    for (const key of fsMap.keys()) {
+      fsMock.set(path.resolve(key), fsMap.get(key))
+    }
+    return fsMock
+  }
 }
 export {
   PartitionerImportNamesTestDate,
