@@ -7,28 +7,29 @@ describe('PartitionerImportNames class:', () => {
   let partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings()
   let partitioner = new PartitionerImportNames(partitionerSettings)
 
-  describe('check mock implementations:', function(){
-    describe('getImportsFrom method:', function (this: typeof partitioner) {
-      it.each([...dataForPartitioner.requireMock.entries()])
-        ('shouldt return string[] for correct path: %s', (importsPath, requireMock) => {
-        expect(partitioner.getImportsFrom(importsPath)).toEqual(requireMock)
-      })
-      it('shouldt trow for incorrect path', () => {
-        expect(()=>partitioner.getImportsFrom('asdafgsg')).toThrow('MOCK file not founded')
-      })
+
+  describe('getImportsFrom method:', function (this: typeof partitioner) {
+    it.each([...dataForPartitioner.requireMock.entries()])
+      ('shouldt return string[] for correct path: %s', (importsPath, requireMock) => {
+      expect(partitioner.getImportsFrom(importsPath)).toEqual(requireMock)
     })
-    describe('checkExistsPromise method:', function (this: typeof partitioner) {
-      it.each([...dataForPartitioner.fsMock.values()])
-        ('shouldt resolves for correct path', (importsPath) => {
-          return expect(partitioner.checkExistsPromise(importsPath)).resolves.toBeUndefined()
-        })
-      it('shouldt rejectes for incorrect path', () => {
-        return expect(partitioner.checkExistsPromise('asdwq')).rejects.toBeUndefined()
-      })
+    it('shouldt trow for incorrect path', () => {
+      expect(()=>partitioner.getImportsFrom('asdafgsg')).toThrow('MOCK file not founded')
     })
-    describe.each(partitionerSettings.sources)('from:\n%s', (source) => {
+  })
+  describe('checkExistsPromise method:', function (this: typeof partitioner) {
+    it.each([...dataForPartitioner.fsMock.values()])
+      ('shouldt resolves for correct path', (importsPath) => {
+        return expect(partitioner.checkExistsPromise(importsPath)).resolves.toBeUndefined()
+      })
+    it('shouldt rejectes for incorrect path', () => {
+      return expect(partitioner.checkExistsPromise('asdwq')).rejects.toBeUndefined()
+    })
+  })
+  describe('partitionBlocksFromPath method:', () => {
+    describe.each(partitionerSettings.sources)('from: %s', (source) => {
       describe.each([...dataForPartitioner.requireMock.values()])
-        ('partitionBlocksFromPath method:', function (this: typeof partitioner, ...requires) {
+        ('is requires:', function (this: typeof partitioner, ...requires) {
           const requiresSet = new Set(requires)
           it('shouldt return Promise.resolve<{exists, notExists: string[]}>', async () => {
             await expect(partitioner.partitionBlocksFromPath(source, requiresSet)).resolves.toBeDefined()
@@ -80,7 +81,10 @@ describe('PartitionerImportNames class:', () => {
         })
     })
   })
+
+
 })
+
 
 describe('PartitionerImportNames class it ones created:', () => {
   let partitioner: PartitionerImportNames
