@@ -1,7 +1,8 @@
 import { SettingsPartitionerImportNames, ImportNamesCollection, NamesList } from '../types'
 import { PartitionerImportNames } from '../__mock__/PartitionerImportNames'
 import { PartitionerImportNamesTestDate } from '../__mock__/PartitionerImportNames.test.date'
-describe.only('PartitionerImportNames class:', () => {
+import path = require('path')
+describe('PartitionerImportNames class:', () => {
   let dataForPartitioner = new PartitionerImportNamesTestDate()
   let partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings()
   let partitioner = new PartitionerImportNames(partitionerSettings)
@@ -9,7 +10,7 @@ describe.only('PartitionerImportNames class:', () => {
   describe('check mock implementations:', function(){
     describe('getImportsFrom method:', function (this: typeof partitioner) {
       it.each([...dataForPartitioner.requireMock.entries()])
-        ('shouldt return string[] for correct path', (importsPath, requireMock) => {
+        ('shouldt return string[] for correct path: %s', (importsPath, requireMock) => {
         expect(partitioner.getImportsFrom(importsPath)).toEqual(requireMock)
       })
       it('shouldt trow for incorrect path', () => {
@@ -25,25 +26,63 @@ describe.only('PartitionerImportNames class:', () => {
         return expect(partitioner.checkExistsPromise('asdwq')).rejects.toBeUndefined()
       })
     })
-    const q = ((sources) => { })(partitionerSettings.sources,);
-
     describe.each(partitionerSettings.sources)('from:\n%s', (source) => {
       describe.each([...dataForPartitioner.requireMock.values()])
         ('partitionBlocksFromPath method:', function (this: typeof partitioner, ...requires) {
           const requiresSet = new Set(requires)
-          it.skip('shouldt not return Promise.reject', () => {
-            // return expect(partitioner.partitionBlocksFromPath(source, requires)).resolves
+          it('shouldt return Promise.resolve<{exists, notExists: string[]}>', async () => {
+            await expect(partitioner.partitionBlocksFromPath(source, requiresSet)).resolves.toBeDefined()
+            const resolve = await partitioner.partitionBlocksFromPath(source, requiresSet)
+            expect(resolve).toMatchObject({exists: expect.any(Array), notExists: expect.any(Array)})
           })
-          it('shouldt return Promise.resolve<{exists, notExists: string[]}>', () => {
-            return expect(partitioner.partitionBlocksFromPath(source, requiresSet)).resolves.toBeDefined()
+          describe(`result = await partitionBlocksFromPath(source, requiresSet)`, () => {
+            beforeEach(() => {
+              jest.clearAllMocks()
+            })
+            it('result.exists concat result.notExists <=> inputSet', async () => {
+              const result = await partitioner.partitionBlocksFromPath(source, requiresSet)
+              expect(result.exists.length + result.notExists.length).toBe(requiresSet.size)
+              const concatedPartitionBlocks = [].concat(result.exists, result.notExists)
+              expect(concatedPartitionBlocks).toEqual(expect.arrayContaining(Array.from(requiresSet)))
+              expect(Array.from(requiresSet)).toEqual(expect.arrayContaining(concatedPartitionBlocks))
+            })
+            it('result.exists shouldt be includes to source', async() => {
+              const result = await partitioner.partitionBlocksFromPath(source, requiresSet)
+              const directoryContents = [...dataForPartitioner.fileSistemShot.get(source)]
+              expect(directoryContents).toEqual(expect.arrayContaining(result.exists))
+            })
+            it('result.notExists shouldt be not includes to source', async() => {
+              const result = await partitioner.partitionBlocksFromPath(source, requiresSet)
+              if (result.notExists.length <= 0)
+                expect(result.notExists).toHaveLength(0)
+              else {
+                const directoryContents = [...dataForPartitioner.fileSistemShot.get(source)]
+                expect(directoryContents).not.toEqual(expect.arrayContaining(result.notExists))}
+            })
           })
+          describe('call checkExistsPromise for every require:', () => {
+            beforeEach(() => {
+              jest.clearAllMocks()
+            })
+            it('CalledTimes == requiresSet.size', async() => {
+              await partitioner.partitionBlocksFromPath(source, requiresSet)
+              expect(partitioner.checkExistsPromise).toBeCalledTimes(requiresSet.size)
+            })
+            it('CalledWith == requiresSet', async () => {
+              await partitioner.partitionBlocksFromPath(source, new Set(requires))
+              for (const req of requires.map(req => path.resolve(source, req))) {
+                expect(partitioner.checkExistsPromise).toBeCalledWith(req)
+              }
+            })
+
+          })
+
         })
     })
   })
 })
 
 describe('PartitionerImportNames class it ones created:', () => {
-  expect(123).toBe(123)
   let partitioner: PartitionerImportNames
   let dataForPartitioner = new PartitionerImportNamesTestDate()
   let partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings();
