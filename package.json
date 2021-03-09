@@ -24,7 +24,9 @@
   "homepage": "https://github.com/ArhDemetriy/webpak#readme",
   "browserslist": "> 0.25%, not dead",
   "jest": {
-    "preset": "ts-jest"
+    "preset": "ts-jest",
+    "collectCoverage": true,
+    "coverageReporters": ["html"]
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
