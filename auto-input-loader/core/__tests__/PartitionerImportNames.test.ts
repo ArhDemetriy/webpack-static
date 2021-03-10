@@ -5,8 +5,7 @@ import path = require('path')
 describe('PartitionerImportNames class:', () => {
   let dataForPartitioner = new PartitionerImportNamesTestDate()
   let partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings()
-  let partitioner = new PartitionerImportNames(partitionerSettings)
-
+  let partitioner = new PartitionerImportNames(partitionerSettings);
 
   describe('getImportsFrom method:', function (this: typeof partitioner) {
     it.each([...dataForPartitioner.requireMock.entries()])
@@ -79,19 +78,58 @@ describe('PartitionerImportNames class:', () => {
         })
     })
   })
-  describe.only('getAdditionalImports method:', function (this: typeof partitioner) {
+  describe('getAdditionalImports method:', function (this: typeof partitioner) {
     it('shouldt toBe', () => {
       expect(partitioner.getAdditionalImports).toBeDefined()
     })
-    it('shouldt return string[]', () => {
-      expect(partitioner.getAdditionalImports('kkdtfh', ['jdjdjg', 'hdsdf'])).toEqual(expect.any(Array))
+    it('shouldt rejected for empty checkableBlocks (2 attr)', () => {
+      return expect(partitioner.getAdditionalImports('kkdtfh', [])).rejects.toEqual([])
     })
-    it('shouldt call partitionBlocksFromPath selfInputs', () => {
-      jest.clearAllMocks()
-      const searcheableBlocks = ['jdjdjg', 'hdsdf']
-      const searcheableFiles = searcheableBlocks.map(block => path.join(block, path.basename(partitionerSettings.importsFilePath)))
-      expect(partitioner.getAdditionalImports('kkdtfh', searcheableBlocks)).toEqual(expect.any(Array))
-      expect(partitioner.partitionBlocksFromPath).toBeCalledWith('kkdtfh', new Set(searcheableFiles), expect.any(Number))
+    describe.each([...dataForPartitioner.requireMock.keys()])('imports from: %s', importsPath => {
+      const checkableBlocks = dataForPartitioner.requireMock.get(importsPath)
+      // const blockName = path.basename(path.dirname(importsPath))
+      describe.each(partitionerSettings.sources)('testings in: %s\n', source => {
+        describe('test exists results:', () => {
+          if (source.includes('simple')) {
+            it('shouldt rejectes([]) if not additional imports', () => {
+              return expect(partitioner.getAdditionalImports(source, checkableBlocks)).rejects.toEqual([])
+            })
+          } else {
+            it('shouldt return string[]', () => {
+              return partitioner.getAdditionalImports(source, checkableBlocks)
+                .then(result => {
+                  expect(result).toEqual(expect.any(Array))
+                  expect(result).toContainEqual(expect.any(String))
+                })
+                .catch(result => {
+                  expect(result).toEqual(expect.any(Array))
+                  expect(result).toHaveLength(0)
+                })
+            })
+          }
+        })
+        describe('test correct results:', () => {
+          it('shouldt return all additional imports', async () => {
+            const importFiles = checkableBlocks.map(blockName => path.join(source, blockName, path.basename(partitionerSettings.importsFilePath)))
+            const testValues = importFiles.reduce((additionalImports, importFile) => {
+              const temp = dataForPartitioner.requireMock.get(path.resolve(importFile))
+              return additionalImports.concat(temp || [])
+            }, [])
+            const result = await partitioner.getAdditionalImports(source, checkableBlocks).catch(e => e)
+            expect(result).toEqual(expect.arrayContaining(testValues))
+            expect(testValues).toEqual(expect.arrayContaining(result))
+          })
+        })
+        describe('test calling support functions:', () => {
+          it('shouldt call partitionBlocksFromPath selfInputs', async () => {
+            jest.clearAllMocks()
+            const checkableFiles = checkableBlocks.map(block => path.join(block, path.basename(partitionerSettings.importsFilePath)))
+            await partitioner.getAdditionalImports(source, checkableBlocks).catch(e => e)
+            expect(partitioner.partitionBlocksFromPath).toBeCalledTimes(1)
+            expect(partitioner.partitionBlocksFromPath).toBeCalledWith(source, new Set(checkableFiles), expect.any(Number))
+          })
+        })
+      })
     })
   })
 })

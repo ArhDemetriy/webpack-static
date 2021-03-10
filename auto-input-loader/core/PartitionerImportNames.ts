@@ -40,11 +40,18 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     }, { exists: [] as string[], notExists: [] as string[] })
     return partitionSearchingResults
   }
-  protected getAdditionalImports(source: string, searcheableBlocks: string[]) {
-    const searcheableFiles = new Set(searcheableBlocks.map(block => path.join(block, this.importsFileName)))
-    this.partitionBlocksFromPath(source, searcheableFiles, fsConstants.R_OK)
-    const result = [] as string[]
-    return result
+  protected async getAdditionalImports(where: string, checkableBlocks: string[]) {
+    if (checkableBlocks.length <= 0) return Promise.reject([])
+    const checkableFiles = new Set(checkableBlocks.map(block => path.join(block, this.importsFileName)))
+    const existsFiles = (await this.partitionBlocksFromPath(where, checkableFiles, fsConstants.R_OK)).exists
+    const result: string[] = []
+    for (const fileName of existsFiles) {
+      result.push(...this.getImportsFrom(path.resolve(where, fileName)))
+    }
+    if (result.length <= 0)
+      return Promise.reject([])
+    else
+      return Promise.resolve(result)
   }
 }
 export {
