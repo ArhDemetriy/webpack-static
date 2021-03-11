@@ -10,7 +10,7 @@
     "prod": "cross-env NODE_ENV=production webpack",
     "start": "cross-env NODE_ENV=development webpack serve",
     "testWatch": "jest --watch",
-    "test": "jest auto-input-loader/core/__tests__/PartitionerImportNames.test.ts"
+    "test": "jest auto-input-loader/core/__tests__/PartitionerImportNames.test.ts --watch"
   },
   "repository": {
     "type": "git",
