@@ -41,17 +41,28 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     return partitionSearchingResults
   }
   protected async getAdditionalImports(where: string, checkableBlocks: string[]) {
-    if (checkableBlocks.length <= 0) return Promise.reject([])
+    if (checkableBlocks.length <= 0) return Promise.resolve([])
     const checkableFiles = new Set(checkableBlocks.map(block => path.join(block, this.importsFileName)))
     const existsFiles = (await this.partitionBlocksFromPath(where, checkableFiles, fsConstants.R_OK)).exists
     const result: string[] = []
     for (const fileName of existsFiles) {
       result.push(...this.getImportsFrom(path.resolve(where, fileName)))
     }
-    if (result.length <= 0)
-      return Promise.reject([])
-    else
-      return Promise.resolve(result)
+    return Promise.resolve(result)
+  }
+  protected async getPartitionWisAdditionalBlocksFrom(where: string, checkableBlocks: string[]) {
+    const result: {
+      exists: string[],
+      notExists: string[],
+      additional: string[],
+    } = Object.assign(
+      { additional: [] },
+      await this.partitionBlocksFromPath(where, new Set(checkableBlocks)),
+      )
+    if (result.exists.length >= 1) {
+      result.additional = await this.getAdditionalImports(where, result.exists)
+    }
+    return result
   }
 }
 export {

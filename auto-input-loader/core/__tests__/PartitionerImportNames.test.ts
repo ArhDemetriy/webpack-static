@@ -82,28 +82,25 @@ describe('PartitionerImportNames class:', () => {
     it('shouldt toBe', () => {
       expect(partitioner.getAdditionalImports).toBeDefined()
     })
-    it('shouldt rejected for empty checkableBlocks (2 attr)', () => {
-      return expect(partitioner.getAdditionalImports('kkdtfh', [])).rejects.toEqual([])
+    it('shouldt resolves === [] for empty checkableBlocks (2 attr)', () => {
+      return expect(partitioner.getAdditionalImports('kkdtfh', [])).resolves.toEqual([])
     })
     describe.each([...dataForPartitioner.requireMock.keys()])('imports from: %s', importsPath => {
       const checkableBlocks = dataForPartitioner.requireMock.get(importsPath)
-      // const blockName = path.basename(path.dirname(importsPath))
       describe.each(partitionerSettings.sources)('testings in: %s\n', source => {
         describe('test exists results:', () => {
           if (source.includes('simple')) {
-            it('shouldt rejectes([]) if not additional imports', () => {
-              return expect(partitioner.getAdditionalImports(source, checkableBlocks)).rejects.toEqual([])
+            it('shouldt resolves === [] if not additional imports', () => {
+              return expect(partitioner.getAdditionalImports(source, checkableBlocks)).resolves.toEqual([])
             })
           } else {
             it('shouldt return string[]', () => {
               return partitioner.getAdditionalImports(source, checkableBlocks)
                 .then(result => {
                   expect(result).toEqual(expect.any(Array))
-                  expect(result).toContainEqual(expect.any(String))
-                })
-                .catch(result => {
-                  expect(result).toEqual(expect.any(Array))
-                  expect(result).toHaveLength(0)
+                  if (result.length>=1) {
+                    expect(result).toContainEqual(expect.any(String))
+                  }
                 })
             })
           }
@@ -128,6 +125,74 @@ describe('PartitionerImportNames class:', () => {
             expect(partitioner.partitionBlocksFromPath).toBeCalledTimes(1)
             expect(partitioner.partitionBlocksFromPath).toBeCalledWith(source, new Set(checkableFiles), expect.any(Number))
           })
+        })
+      })
+    })
+  })
+  describe('getPartitionBlocksWisAdditionalImportsFrom method:', function(this: typeof partitioner) {
+    it('shouldt toBe', () => {
+      expect(partitioner.getPartitionWisAdditionalBlocksFrom).toBeDefined()
+    })
+    it('shouldt return { exists, notExists, additional: string[] }', async () => {
+      const result = await partitioner.getPartitionWisAdditionalBlocksFrom('djfgh', ['fghtdfgh', 'fdsg'])
+      expect(result).toMatchObject({
+        exists: expect.any(Array),
+        notExists: expect.any(Array),
+        additional: expect.any(Array),
+      })
+      if (result.exists.length > 0)
+        expect(result.exists[0]).toEqual(expect.any(String))
+      if (result.notExists.length > 0)
+        expect(result.notExists[0]).toEqual(expect.any(String))
+      if (result.additional.length > 0)
+        expect(result.additional[0]).toEqual(expect.any(String))
+    })
+    describe.each([...dataForPartitioner.requireMock.keys()])('imports from: %s', importsPath => {
+      const checkableBlocks = dataForPartitioner.requireMock.get(importsPath)
+      describe.each(partitionerSettings.sources)('testings in: %s\n', source => {
+        it('shouldt return results:', async () => {
+          const result = await partitioner.getPartitionWisAdditionalBlocksFrom(source, checkableBlocks)
+          expect(result).toMatchObject({
+            exists: expect.any(Array),
+            notExists: expect.any(Array),
+            additional: expect.any(Array),
+          })
+          if (result.exists.length > 0)
+            expect(result.exists[0]).toEqual(expect.any(String))
+          if (result.notExists.length > 0)
+            expect(result.notExists[0]).toEqual(expect.any(String))
+          if (result.additional.length > 0)
+            expect(result.additional[0]).toEqual(expect.any(String))
+        })
+        describe('shouldt calling support functions:', () => {
+          it('shouldt call partitionBlocksFromPath', async () => {
+            jest.clearAllMocks()
+            const result = await partitioner.getPartitionWisAdditionalBlocksFrom(source, checkableBlocks)
+            expect(partitioner.partitionBlocksFromPath).toBeCalled()
+            expect((partitioner.partitionBlocksFromPath as jest.Mock).mock.calls.length).toBeLessThanOrEqual(2)
+            expect(partitioner.partitionBlocksFromPath).toHaveBeenNthCalledWith(1, source, new Set(checkableBlocks))
+            expect(partitioner.partitionBlocksFromPath).toReturn()
+            expect(await (partitioner.partitionBlocksFromPath as jest.Mock).mock.results[0].value)
+              .toMatchObject({ exists: result.exists, notExists: result.notExists })
+            })
+            it('shouldt call getAdditionalImports', async () => {
+              jest.clearAllMocks()
+              const result = await partitioner.getPartitionWisAdditionalBlocksFrom(source, checkableBlocks)
+              if (result.exists.length >= 1) {
+                expect(partitioner.getAdditionalImports).toBeCalled()
+              }
+              const CalledTimes = (partitioner.getAdditionalImports as jest.Mock).mock.calls.length
+              expect(CalledTimes).toBeLessThanOrEqual(1)
+              if (CalledTimes >= 1) {
+                expect(partitioner.getAdditionalImports).toHaveBeenNthCalledWith(1, source, result.exists)
+                expect(partitioner.getAdditionalImports).toReturn()
+                expect(await (partitioner.getAdditionalImports as jest.Mock).mock.results[0].value)
+                  .toEqual(result.additional)
+              }
+            })
+        })
+        describe('shouldt return correct results:', () => {
+
         })
       })
     })
