@@ -64,6 +64,27 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     }
     return result
   }
+  protected async recursivelyPartitiondBlocksFrom(where: string, partitionleBlocks: string[]) {
+    const result = {
+      exists: [] as string[],
+      notExists: [] as string[],
+    }
+
+    let additional = partitionleBlocks
+    do {
+      additional = await this.getPartitionWisAdditionalBlocksFrom(where, additional)
+        .then(partitionedBlocks => {
+          result.exists = result.exists.concat(partitionedBlocks.exists)
+          result.notExists = result.notExists.concat(partitionedBlocks.notExists)
+          return partitionedBlocks.additional
+        })
+    } while (additional.length && !additional.every(blockName => result.notExists.includes(blockName)))
+
+    result.notExists = [...(new Set(result.notExists.concat(additional)))]
+    result.exists = [...(new Set(result.exists))]
+
+    return result
+  }
 }
 export {
   PartitionerImportNames,

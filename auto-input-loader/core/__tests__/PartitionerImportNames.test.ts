@@ -192,13 +192,47 @@ describe('PartitionerImportNames class:', () => {
             })
         })
         describe('shouldt return correct results:', () => {
-
+          it('shouldt result.exists concat result.notExists <=> input', async() => {
+            const result = await partitioner.getPartitionWisAdditionalBlocksFrom(source, checkableBlocks)
+            expect(result.exists.concat(result.notExists)).toEqual(expect.arrayContaining(checkableBlocks))
+            expect(checkableBlocks).toEqual(expect.arrayContaining(result.exists.concat(result.notExists)))
+          })
+          it('shouldt result.exists.length + result.notExists.length == input.length', async() => {
+            const result = await partitioner.getPartitionWisAdditionalBlocksFrom(source, checkableBlocks)
+            expect(result.exists.length + result.notExists.length).toBe(checkableBlocks.length)
+          })
+        })
+      })
+    })
+  })
+  describe('recursivelyPartitiondBlocksFrom method:', function(this: typeof partitioner) {
+    it('shouldt toBe ', () => {
+      expect(partitioner.recursivelyPartitiondBlocksFrom).toBeDefined()
+    })
+    it('shouldt return { exists, notExists, additional: string[] }', async () => {
+      const result = await partitioner.recursivelyPartitiondBlocksFrom('djfgh', ['fghtdfgh', 'fdsg'])
+      expect(result).toMatchObject({
+        exists: expect.any(Array),
+        notExists: expect.any(Array),
+      })
+      if (result.exists.length > 0)
+        expect(result.exists[0]).toEqual(expect.any(String))
+      if (result.notExists.length > 0)
+        expect(result.notExists[0]).toEqual(expect.any(String))
+    })
+    describe.each([...dataForPartitioner.requireMock.keys()])('imports from: %s', importsPath => {
+      const checkableBlocks = dataForPartitioner.requireMock.get(importsPath)
+      describe.each(partitionerSettings.sources)('testings in: %s\n', source => {
+        describe('shouldt return correct results:', () => {
+          it('result shouldt containing input', async () => {
+            const result = await partitioner.recursivelyPartitiondBlocksFrom(source, checkableBlocks)
+            expect(result.exists.concat(result.notExists)).toEqual(expect.arrayContaining(checkableBlocks))
+          })
         })
       })
     })
   })
 })
-
 describe('PartitionerImportNames class it ones created:', () => {
   let partitioner: PartitionerImportNames
   let dataForPartitioner = new PartitionerImportNamesTestDate()
