@@ -21,7 +21,7 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     return require(path.resolve(`${absolutePath}`))
   }
   protected fierstStep(importsFilePath: string) {
-    return this.getImportsFrom(importsFilePath)
+    this.partitionImportsWhereAllSources(this.getImportsFrom(importsFilePath))
   }
   protected async partitionBlocksFromPath(source: string, searcheableBlocks: Set<string>, fsConstant = fsConstants.F_OK) {
     const searchers: Promise<string>[] = []
@@ -84,6 +84,30 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
     result.exists = [...(new Set(result.exists))]
 
     return result
+  }
+  protected async partitionImportsWhereAllSources(partitionleImports: string[]) {
+    const findedBlocks: Set<string> = new Set()
+    let notExists = partitionleImports
+    let testArray: string[] = []
+    do {
+      testArray = [...new Set(testArray.concat(notExists))]
+      for (const source of this.sources) {
+        const importsFromThisSource = this.partitionedImportNames.get(source)
+        notExists = await this.recursivelyPartitiondBlocksFrom(source, notExists)
+          .then(partitionedBlocks => {
+            partitionedBlocks.exists.forEach(blockName => {
+              importsFromThisSource.add(blockName)
+              findedBlocks.add(blockName)
+            })
+            return partitionedBlocks.notExists
+          })
+        if (notExists.length <= 0) return []
+      }
+      if (testArray.length < (new Set(notExists)).size) continue
+    } while (notExists.length && notExists.some(blockName => !testArray.includes(blockName)))
+    if (notExists.length >= 2)
+      notExists = [...new Set(notExists)]
+    return notExists
   }
 }
 export {

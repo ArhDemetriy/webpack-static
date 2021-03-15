@@ -232,6 +232,52 @@ describe('PartitionerImportNames class:', () => {
       })
     })
   })
+  describe('partitionImportsWhereAllSources method:', function(this: typeof partitioner) {
+    it('shouldt toBe', () => {
+      expect(partitioner.partitionImportsWhereAllSources).toBeDefined()
+    })
+    it('shouldt return string[] ', async () => {
+      const result = await partitioner.partitionImportsWhereAllSources(['fghtdfgh', 'fdsg'])
+      expect(result).toMatchObject(expect.any(Array))
+      if (result.length >= 1)
+        expect(result).toContainEqual(expect.any(String))
+    })
+    describe.each([...dataForPartitioner.requireMock.keys()])('imports from: %s', importsPath => {
+      const checkableBlocks = dataForPartitioner.requireMock.get(importsPath)
+      describe('shouldt return correct results:', () => {
+        it('shouldt return [] for requires from requireMock', () => {
+          return partitioner.partitionImportsWhereAllSources(checkableBlocks)
+            .then(result => {
+              expect(result).toEqual([])
+              expect(result).toHaveLength(0)
+            })
+        })
+        it('shouldt return [...notExistsBlocks] for requires from requireMock, concat [...notExistsBlocks]', () => {
+          const notExistsBlocks = ['sdifguysodfg', 'dfguliu', 'odufybdfy',]
+          const checkableBlocks = dataForPartitioner.requireMock.get(importsPath)
+          return expect(partitioner.partitionImportsWhereAllSources(notExistsBlocks.concat(checkableBlocks))).resolves.toEqual(notExistsBlocks)
+        })
+        it('sum all size sets in partitionedImportNames >= input.length', async () => {
+          const checkableBlocks = dataForPartitioner.requireMock.get(importsPath)
+          const result = await partitioner.partitionImportsWhereAllSources(checkableBlocks)
+          let allSizes = 0
+          for (const nameList of partitioner.partitionedImportNames.values()) {
+            allSizes += nameList.size
+          }
+          expect(allSizes).toBeGreaterThanOrEqual(checkableBlocks.length)
+        })
+        it('concat all sets in partitionedImportNames consists input', async () => {
+          const checkableBlocks = dataForPartitioner.requireMock.get(importsPath)
+          const result = await partitioner.partitionImportsWhereAllSources(checkableBlocks)
+          let concatedPartitionedImportNames = []
+          for (const nameList of partitioner.partitionedImportNames.values()) {
+            concatedPartitionedImportNames.push(...nameList)
+          }
+          expect(concatedPartitionedImportNames).toEqual(expect.arrayContaining(checkableBlocks))
+        })
+      })
+    })
+  })
 })
 describe('PartitionerImportNames class it ones created:', () => {
   let partitioner: PartitionerImportNames
@@ -276,24 +322,10 @@ describe('PartitionerImportNames class it ones created:', () => {
     })
     it('shouldt return string[] from initial imports file', () => {
       expect(fS()).nthCalledWith(1, partitionerSettings.importsFilePath)
-      const initialImports = dataForPartitioner.requireMock.get(partitionerSettings.importsFilePath)
-      expect(fS()).nthReturnedWith(1, expect.arrayContaining(initialImports))
     })
     it('shouldt call getImportsFrom with self input', () => {
       expect(partitioner.getImportsFrom).toBeCalled()
       expect(partitioner.getImportsFrom).toBeCalledWith(partitionerSettings.importsFilePath)
     })
   })
-  describe('getImportsFrom method:', function (this: typeof partitioner) {
-    const gif = () => partitioner.getImportsFrom
-    it('shouldt be called and returned after create class ', () => {
-      expect(gif()).toBeCalled()
-      expect(gif()).toReturn()
-    })
-  })
 })
-
-
-
-
-
