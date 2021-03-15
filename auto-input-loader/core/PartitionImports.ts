@@ -1,11 +1,11 @@
-import { ImportNamesCollection, NamesList, InterfacePartitionerImportNames, SettingsPartitionerImportNames } from './types'
+import { ImportNamesCollection, NamesList, InterfacePartitionImports, SettingsPartitionImports } from './types'
 import path = require('path')
 import { constants as fsConstants, promises as fsPromises } from 'fs'
-class PartitionerImportNames implements InterfacePartitionerImportNames{
+class PartitionImports implements InterfacePartitionImports{
   protected readonly partitionedImportNames: ImportNamesCollection = new Map()
   protected readonly sources: string[];
   protected readonly importsFileName: string;
-  constructor(settings: SettingsPartitionerImportNames) {
+  constructor(settings: SettingsPartitionImports) {
     settings.sources.forEach(source => this.partitionedImportNames.set(source, new Set))
     this.sources = [].concat(settings.sources)
     this.importsFileName = path.basename(settings.importsFilePath)
@@ -111,5 +111,5 @@ class PartitionerImportNames implements InterfacePartitionerImportNames{
   }
 }
 export {
-  PartitionerImportNames,
+  PartitionImports,
 }

@@ -66,7 +66,7 @@ const requires = new Map([
   //     '',
   //   ]],
 ])
-class PartitionerImportNamesTestDate {
+class PartitionImportsTestDate {
   importsFileName = importsFileName
   static partitionerSettings() {
     return {
@@ -121,5 +121,5 @@ class PartitionerImportNamesTestDate {
   }
 }
 export {
-  PartitionerImportNamesTestDate,
+  PartitionImportsTestDate,
 }

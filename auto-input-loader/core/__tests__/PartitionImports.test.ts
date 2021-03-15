@@ -1,11 +1,11 @@
-import { SettingsPartitionerImportNames, ImportNamesCollection, NamesList } from '../types'
-import { PartitionerImportNames } from '../__mock__/PartitionerImportNames'
-import { PartitionerImportNamesTestDate } from '../__mock__/PartitionerImportNames.test.date'
+import { SettingsPartitionImports, ImportNamesCollection, NamesList } from '../types'
+import { PartitionImports } from '../__mock__/PartitionImports'
+import { PartitionImportsTestDate } from '../__mock__/PartitionImports.test.date'
 import path = require('path')
-describe('PartitionerImportNames class:', () => {
-  let dataForPartitioner = new PartitionerImportNamesTestDate()
-  let partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings()
-  let partitioner = new PartitionerImportNames(partitionerSettings);
+describe('PartitionImports class:', () => {
+  let dataForPartitioner = new PartitionImportsTestDate()
+  let partitionerSettings = PartitionImportsTestDate.partitionerSettings()
+  let partitioner = new PartitionImports(partitionerSettings);
 
   describe('getImportsFrom method:', function (this: typeof partitioner) {
     it.each([...dataForPartitioner.requireMock.entries()])
@@ -279,15 +279,15 @@ describe('PartitionerImportNames class:', () => {
     })
   })
 })
-describe('PartitionerImportNames class it ones created:', () => {
-  let partitioner: PartitionerImportNames
-  let dataForPartitioner = new PartitionerImportNamesTestDate()
-  let partitionerSettings = PartitionerImportNamesTestDate.partitionerSettings();
+describe('PartitionImports class it ones created:', () => {
+  let partitioner: PartitionImports
+  let dataForPartitioner = new PartitionImportsTestDate()
+  let partitionerSettings = PartitionImportsTestDate.partitionerSettings();
   beforeAll(() => {
     jest.clearAllMocks()
-    partitioner = new PartitionerImportNames(partitionerSettings);
+    partitioner = new PartitionImports(partitionerSettings);
   })
-  it('shouldt toBe implements PartitionerImportNames', () => {
+  it('shouldt toBe implements PartitionImports', () => {
     expect(partitioner).toBeDefined()
     expect(partitioner).toHaveProperty('getPartitionedNames')
     expect(typeof partitioner.getPartitionedNames).toBe('function')

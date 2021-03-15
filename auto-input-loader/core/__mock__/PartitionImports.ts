@@ -1,8 +1,8 @@
 import { mockedClass } from '../../../utils/mockingClass'
-import { PartitionerImportNames } from '../PartitionerImportNames'
-import { PartitionerImportNamesTestDate } from './PartitionerImportNames.test.date'
+import { PartitionImports } from '../PartitionImports'
+import { PartitionImportsTestDate } from './PartitionImports.test.date'
 
-let dataForPartitioner = new PartitionerImportNamesTestDate();
+let dataForPartitioner = new PartitionImportsTestDate();
 
 {const implementations:[string, (...args: any[]) => any][] =[
   ['getImportsFrom', function (s: string) {
@@ -19,9 +19,9 @@ let dataForPartitioner = new PartitionerImportNamesTestDate();
       return Promise.reject()
   }],
 ]
-mockedClass(PartitionerImportNames, new Map(implementations));
+mockedClass(PartitionImports, new Map(implementations));
 }
 
 export {
-  PartitionerImportNames,
+  PartitionImports,
 }
