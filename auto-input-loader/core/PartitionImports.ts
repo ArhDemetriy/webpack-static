@@ -40,7 +40,7 @@ class PartitionImports implements InterfacePartitionImports{
     }, { exists: [] as string[], notExists: [] as string[] })
     return partitionSearchingResults
   }
-  protected async getAdditionalImports(where: string, checkableBlocks: string[]) {
+  protected async getAdditionalImports(where: string, checkableBlocks: string[]): Promise<string[]> {
     if (checkableBlocks.length <= 0) return Promise.resolve([])
     const checkableFiles = new Set(checkableBlocks.map(block => path.join(block, this.importsFileName)))
     const existsFiles = (await this.partitionBlocksFromPath(where, checkableFiles, fsConstants.R_OK)).exists
