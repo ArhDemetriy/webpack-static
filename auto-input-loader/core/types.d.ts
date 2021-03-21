@@ -8,7 +8,9 @@ declare interface InterfacePartitionImports{
   getPartitionedNames(): ImportNamesCollection,
 }
 declare type SettingsParserResolves = {
-  sources: string[]
+  sources: string[],
+  startImportFilePath: string,
+  parsedImportFilesGenerators: Map<string, (filePath: string) => string>,
 }
 declare interface InterfaceParserResolves{
   getPartitionedPaths(): ImportNamesCollection,

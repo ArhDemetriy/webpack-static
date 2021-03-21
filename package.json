@@ -10,7 +10,8 @@
     "prod": "cross-env NODE_ENV=production webpack",
     "start": "cross-env NODE_ENV=development webpack serve",
     "testWatch": "jest --watch",
-    "test": "jest auto-input-loader/core/__tests__/PartitionImports.test.ts --watch"
+    "test1": "jest auto-input-loader/core/__tests__/PartitionImports.test.ts --watch",
+    "test": "jest auto-input-loader/core/__tests__/ParserResolves.test.ts"
   },
   "repository": {
     "type": "git",

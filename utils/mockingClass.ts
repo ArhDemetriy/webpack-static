@@ -6,9 +6,9 @@ function wisoutMockImplementations<T>(this: newCall<T>, mc: newCall<T>) {
   }
 }
 type arrayImplementations = [string, (...args: any[]) => any][]
-type collectionsOfImplementations = Map<string, (...args: any[]) => any>
+type collectionsOfImplementations<T> = Map<string, (this: T, ...args: any[]) => any>
 function wisMockImplementations<T>
-  (this: newCall<T>, mc: newCall<T>, implementations: collectionsOfImplementations) {
+  (this: newCall<T>, mc: newCall<T>, implementations: collectionsOfImplementations<T>) {
   for (const name in mc.prototype) {
     if (typeof mc.prototype[name] == 'function') {
       if (implementations.has(name))
@@ -20,7 +20,7 @@ function wisMockImplementations<T>
   }
 }
 
-function mockedClass<T>(mockedClass: newCall<T>, implementations?: collectionsOfImplementations) {
+function mockedClass<T>(mockedClass: newCall<T>, implementations?: collectionsOfImplementations<T>) {
   if (!implementations || implementations.size <= 0)
     wisoutMockImplementations.call(mockedClass, mockedClass)
   else

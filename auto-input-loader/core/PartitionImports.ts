@@ -2,10 +2,12 @@ import { ImportNamesCollection, NamesList, InterfacePartitionImports, SettingsPa
 import path = require('path')
 import { constants as fsConstants, promises as fsPromises } from 'fs'
 class PartitionImports implements InterfacePartitionImports{
-  protected readonly partitionedImportNames: ImportNamesCollection = new Map()
+  protected readonly partitionedImportNames: ImportNamesCollection
   protected readonly sources: string[];
   protected readonly importsFileName: string;
+  protected notExistsImports: Promise<string[]>;
   constructor(settings: SettingsPartitionImports) {
+    this.partitionedImportNames = new Map()
     settings.sources.forEach(source => this.partitionedImportNames.set(source, new Set))
     this.sources = [].concat(settings.sources)
     this.importsFileName = path.basename(settings.importsFilePath)
@@ -14,6 +16,9 @@ class PartitionImports implements InterfacePartitionImports{
   getPartitionedNames() {
     return this.partitionedImportNames
   }
+  getPartitionedNamesAsync() {
+    return this.notExistsImports.then(_ => this.partitionedImportNames)
+  }
   protected checkExistsPromise(absolutePath: string, fsConstant = fsConstants.F_OK) {
     return fsPromises.access(path.resolve(`${absolutePath}`), fsConstant)
   }
@@ -21,7 +26,7 @@ class PartitionImports implements InterfacePartitionImports{
     return require(path.resolve(`${absolutePath}`))
   }
   protected fierstStep(importsFilePath: string) {
-    this.partitionImportsWhereAllSources(this.getImportsFrom(importsFilePath))
+    this.notExistsImports = this.partitionImportsWhereAllSources(this.getImportsFrom(importsFilePath))
   }
   protected async partitionBlocksFromPath(source: string, searcheableBlocks: Set<string>, fsConstant = fsConstants.F_OK) {
     const searchers: Promise<string>[] = []
