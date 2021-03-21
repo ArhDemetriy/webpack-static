@@ -92,7 +92,7 @@ const webpackConfig : Configuration = {
           path.resolve(__dirname, "src/pages")
         ],
         exclude: [
-          s => path.basename(s, path.extname(s)) == 'import'
+          s => path.basename(s, path.extname(s)) == 'imports'
         ],
         use: [
           {
@@ -122,7 +122,7 @@ const webpackConfig : Configuration = {
             path.resolve(__dirname, "src/pages")
           ],
           not: [
-            s => path.basename(s, path.extname(s)) == 'import'
+            s => path.basename(s, path.extname(s)) == 'imports'
           ]
         },
         use: [
