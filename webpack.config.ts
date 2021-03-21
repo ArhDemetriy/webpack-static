@@ -103,9 +103,14 @@ const webpackConfig : Configuration = {
             }
           },
           {
-            loader: path.resolve(__dirname, 'auto-input-loader/pug-auto-input-loader.ts'),
+            loader: path.resolve(__dirname, 'auto-input-loader/auto-input-loader.ts'),
             options: {
+              sources: ['src/components/complicated', 'src/components/simple',],
+              startImportFileName: 'import.json',
               importGenerator: function (importPath) { return `include ${importPath}` },
+              parsedImportFilesGenerators: new Map([
+                ['imports.pug', (importPath) => `include ${importPath.split('\\').join('/')}\n`],
+              ]),
             }
           }
         ]

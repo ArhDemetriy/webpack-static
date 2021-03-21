@@ -1,9 +1,8 @@
 declare type AutoInputOptions =
   {
-    importGenerator: (this: AutoInputOptions, importPath: string) => string,
-    extnameImportsFile: string,
-    basenameImportsFile: string,
-    sourcePaths: string[]
+    sources: ['src/components'],
+    startImportFileName: string,
+    parsedImportFilesGenerators: Map<string, (fileName: string) => string>,
   }
 export {
   AutoInputOptions
