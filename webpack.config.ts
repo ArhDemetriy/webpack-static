@@ -1,12 +1,13 @@
-/** @type {import('webpack').Configuration} */
-const path = require('path')
-const webpack = require('webpack');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const HTMLWebpackPlugin = require('html-webpack-plugin')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
-const TerserWebpackPlugin = require('terser-webpack-plugin')
+/** @type {import('node')} */
+import {Configuration} from "webpack";
+
+import path = require('path')
+import { CleanWebpackPlugin } from 'clean-webpack-plugin'
+import CopyWebpackPlugin = require('copy-webpack-plugin')
+import HTMLWebpackPlugin = require('html-webpack-plugin')
+import MiniCssExtractPlugin = require('mini-css-extract-plugin')
+import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
+import TerserWebpackPlugin = require('terser-webpack-plugin')
 
 const isDev = process.env.NODE_ENV == 'development'
 
@@ -14,7 +15,7 @@ const mode = isDev => {
   return isDev ? 'development' : 'production'
 }
 const optimization = isDev => {
-  const config = {
+  const config: Configuration["optimization"]  = {
     splitChunks: {
       chunks: 'all'
     },
@@ -39,7 +40,7 @@ const HTMLWebpackPluginSetup = name => {
     filename: HTMLfilename(name, isDev),
   }
 }
-const cssLoaders = (extra) => {
+const cssLoaders = (extra?) => {
   let loaders = [
     MiniCssExtractPlugin.loader,
     'css-loader']
@@ -48,7 +49,7 @@ const cssLoaders = (extra) => {
   return loaders
 }
 
-module.exports = {
+const webpackConfig : Configuration = {
   context: path.resolve(__dirname, 'src'),
   mode: mode(isDev),
   target: isDev ? "web" : "browserslist",
@@ -63,16 +64,12 @@ module.exports = {
     alias: {
       '@simple': path.resolve(__dirname, 'src/components/simple'),
       '@complicated': path.resolve(__dirname, 'src/components/complicated'),
+      '@components': path.resolve(__dirname, 'src/components'),
       '@layouts': path.resolve(__dirname, 'src/layouts'),
       '@pages': path.resolve(__dirname, 'src/pages'),
     },
   },
   optimization: optimization(isDev),
-  devServer: {
-    port: 1234,
-    hot: isDev,
-    inline: true
-  },
   plugins: [
     // new webpack.HotModuleReplacementPlugin({}),
     new HTMLWebpackPlugin(HTMLWebpackPluginSetup('index')),
@@ -91,23 +88,56 @@ module.exports = {
     rules: [
       {
         test: /\.pug$/,
+        include: [
+          path.resolve(__dirname, "src/pages")
+        ],
+        exclude: [
+          s => path.basename(s, path.extname(s)) == 'imports'
+        ],
         use: [
           {
             loader: 'pug-loader',
             options: {
-              root: path.resolve(__dirname, 'src')
+              root: path.resolve(__dirname, 'src'),
+              basedir: path.resolve(__dirname, 'src'),
             }
           },
-          // 'raw-loader',
-          // 'html-loader',
-          // 'pug-html-loader',
+          {
+            loader: 'auto-imports-loader',
+            options: {
+              sources: ['src/components/complicated', 'src/components/simple',],
+              startImportFileName: 'import.json',
+              parsedImportFilesGenerators: new Map([
+                ['imports.pug', (importPath) => `include ${importPath.split('\\').join('/')}\n`],
+              ]),
+            }
+          }
+        ]
+      },
+      {
+        test: /\.pug$/,
+        exclude: {
+          and: [
+            path.resolve(__dirname, "src/pages")
+          ],
+          not: [
+            s => path.basename(s, path.extname(s)) == 'imports'
+          ]
+        },
+        use: [
+          {
+            loader: 'pug-loader',
+            options: {
+              root: path.resolve(__dirname, 'src'),
+              basedir: path.resolve(__dirname, 'src'),
+            }
+          },
         ]
       },
       {
         test: /\.css$/,
         use: cssLoaders(),
       },
-
       {
         test: /\.s[ac]ss$/,
         use: cssLoaders('sass-loader'),
@@ -132,7 +162,7 @@ module.exports = {
           }
         }
       },
-
     ]
   }
 }
+export default webpackConfig

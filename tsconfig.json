@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    // "target": "ESNext",
+    "lib": ["es2020","ESNext"],
+    // "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true
+  }
+}
