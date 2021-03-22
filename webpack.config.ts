@@ -16,8 +16,24 @@ const mode = isDev => {
 }
 const optimization = isDev => {
   const config: Configuration["optimization"]  = {
+    runtimeChunk: 'single',
     splitChunks: {
-      chunks: 'all'
+      chunks: 'all',
+      maxInitialRequests: Infinity,
+      minSize: 1000,
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            // получает имя, то есть node_modules/packageName/not/this/part.js
+            // или node_modules/packageName
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+            // имена npm-пакетов можно, не опасаясь проблем, использовать
+           // в URL, но некоторые серверы не любят символы наподобие @
+            return `npm.${packageName.replace('@', '')}`;
+          },
+        },
+      },
     },
   }
   if (!isDev) {
