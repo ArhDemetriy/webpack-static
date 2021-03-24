@@ -1,5 +1,5 @@
 /** @type {import('node')} */
-import {Configuration, RuleSetRule, RuleSetUseItem} from "webpack";
+import { Configuration, RuleSetRule, RuleSetUseItem } from "webpack"
 
 import path = require('path')
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
@@ -12,35 +12,20 @@ import TerserWebpackPlugin = require('terser-webpack-plugin')
 import { AutoInputOptions } from "auto-imports-loader/types";
 
 class WebpackConfigModule {
-    getModule() {
-      return this.module
-    }
+  getModule() {
+    return this.module
+  }
   private readonly module: Configuration['module'] = { rules: [] }
-  private readonly rules: Configuration['module']['rules'] = this.module.rules
-  protected readonly importFilesGenerators: AutoInputOptions['parsedImportFilesGenerators']
-  constructor(options?: { importFilesGenerators: AutoInputOptions['parsedImportFilesGenerators'], importJsonFileName: string }) {
-    if (options) {
-      this.importFilesGenerators = options.importFilesGenerators
-    }
+  protected readonly rules: Configuration['module']['rules'] = this.module.rules
+  protected readonly importJsonFileName: string = 'imports'
+
+  constructor() {
     this.rules.push(this.getJsRule())
     this.rules.push(this.getTsRule())
     this.rules.push(this.getCssRule())
     this.rules.push(this.getScssRule())
-    this.rules.push(this.getPugRule())
-  }
-  protected getPugRule(): RuleSetRule {
-    const pugRule: RuleSetRule = {}
-    pugRule.test = /\.pug$/
-    pugRule.use = [
-      {
-        loader: 'pug-loader',
-        options: {
-          root: path.resolve(__dirname, 'src'),
-          basedir: path.resolve(__dirname, 'src'),
-        }
-      },
-    ]
-    return pugRule
+    this.rules.push(this.getPugRuleForMainFiles())
+    this.rules.push(this.getPugRuleForOtherFiles())
   }
   protected getCssRule(): RuleSetRule {
     const cssRule: RuleSetRule = {}
@@ -84,6 +69,62 @@ class WebpackConfigModule {
       options?: { presets: string[], [index: string]: any }
     }).options.presets.push('@babel/preset-typescript')
     return tsRule
+  }
+  protected getPugRule(): RuleSetRule {
+    const pugRule: RuleSetRule = {}
+    pugRule.test = /\.pug$/
+    pugRule.use = [
+      {
+        loader: 'pug-loader',
+        options: {
+          root: path.resolve(__dirname, 'src'),
+          basedir: path.resolve(__dirname, 'src'),
+        }
+      },
+    ]
+    return pugRule
+  }
+  protected getPugRuleForMainFiles(): RuleSetRule {
+    const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
+
+    const ruleForAutoImports: RuleSetRule = this.getRuleForAutoImportsLoader(pugImportsExprGenerator, '.pug')
+    const pugRule: RuleSetRule = this.getPugRule()
+
+    ruleForAutoImports.use = (pugRule.use as RuleSetUseItem[]).concat(ruleForAutoImports.use)
+
+    return Object.assign({}, pugRule, ruleForAutoImports)
+  }
+  protected getPugRuleForOtherFiles(): RuleSetRule {
+    const pugRuleForMainFile: RuleSetRule = this.getPugRuleForMainFiles()
+    const pugRule: RuleSetRule = this.getPugRule()
+
+    pugRule.exclude = pugRuleForMainFile.include
+    pugRule.include = pugRuleForMainFile.exclude
+
+    return pugRule
+  }
+  protected getRuleForAutoImportsLoader(importExprGenerator: (importPath: string) => string, ext: string, fileName: string = 'imports') {
+    const autoImportsLoaderOptions: AutoInputOptions = {
+      sources: ['src/components/complicated', 'src/components/simple',],
+      startImportFileName: `${fileName}.json`,
+      parsedImportFilesGenerators: new Map([
+        [`${fileName}${ext}`, importExprGenerator],
+      ]),
+    }
+
+    const rule: RuleSetRule = { use: [] };
+    (rule.use as RuleSetUseItem[]).push({
+      loader: 'auto-imports-loader',
+      options: autoImportsLoaderOptions,
+    })
+
+    const include: RuleSetRule['include'] = {
+      and: [path.resolve(__dirname, "src/pages")],
+      not: [(s: string) => path.basename(s, path.extname(s)) == fileName],
+    }
+    rule.include = include
+
+    return rule
   }
 
   protected empty() { }
@@ -146,14 +187,14 @@ class WebpackConfig {
   }
   protected setPlugins() {
     const name = 'index'
-    const HWPSetup = {
+    const HWPSetup : HTMLWebpackPlugin.Options = {
       template: `pages/${name}/${name}.pug`,
       filename: `${name}${this.isDev ? '' : '.[contenthash]'}.html`,
     }
     this.config.plugins = [
       new HTMLWebpackPlugin(HWPSetup),
       new MiniCssExtractPlugin({
-        filename: filename('css',isDev)
+        filename: `[name]${this.isDev ? '' : '.[contenthash]'}.css`
       }),
       new CleanWebpackPlugin(),
     ]
@@ -171,7 +212,7 @@ class WebpackConfig {
   }
   protected setOutput() {
     this.config.output = {
-      filename: filename('js', isDev),
+      filename: `[name]${this.isDev ? '' : '.[contenthash]'}.js`,
       path: path.resolve(__dirname, 'dist'),
     }
   }
@@ -190,110 +231,6 @@ class WebpackConfig {
     // this.config.q =
   }
 }
-const isDev = process.env.NODE_ENV == 'development'
 
-const filename = (ext, isDev) => {
-  return `[name]${isDev ? '' : '.[contenthash]'}.${ext}`
-}
-const HTMLfilename = (name, isDev) => {
-  return `${name}${isDev ? '' : '.[contenthash]'}.html`
-}
-const HTMLWebpackPluginSetup = name => {
-  return {
-    template: `pages/${name}/${name}.pug`,
-    filename: HTMLfilename(name, isDev),
-  }
-}
-const cssLoaders = (extra?) => {
-  let loaders = [
-    MiniCssExtractPlugin.loader,
-    'css-loader']
-  if (extra)
-    loaders.push(extra)
-  return loaders
-}
-
-const webpackConfig : Configuration = {
-  module: {
-    rules: [
-      {
-        test: /\.pug$/,
-        include: [
-          path.resolve(__dirname, "src/pages")
-        ],
-        exclude: [
-          s => path.basename(s, path.extname(s)) == 'imports'
-        ],
-        use: [
-          {
-            loader: 'pug-loader',
-            options: {
-              root: path.resolve(__dirname, 'src'),
-              basedir: path.resolve(__dirname, 'src'),
-            }
-          },
-          {
-            loader: 'auto-imports-loader',
-            options: {
-              sources: ['src/components/complicated', 'src/components/simple',],
-              startImportFileName: 'import.json',
-              parsedImportFilesGenerators: new Map([
-                ['imports.pug', (importPath) => `include ${importPath.split('\\').join('/')}\n`],
-              ]),
-            }
-          }
-        ]
-      },
-      {
-        test: /\.pug$/,
-        exclude: {
-          and: [
-            path.resolve(__dirname, "src/pages")
-          ],
-          not: [
-            s => path.basename(s, path.extname(s)) == 'imports'
-          ]
-        },
-        use: [
-          {
-            loader: 'pug-loader',
-            options: {
-              root: path.resolve(__dirname, 'src'),
-              basedir: path.resolve(__dirname, 'src'),
-            }
-          },
-        ]
-      },
-      {
-        test: /\.css$/,
-        use: cssLoaders(),
-      },
-      {
-        test: /\.s[ac]ss$/,
-        use: cssLoaders('sass-loader'),
-      },
-      {
-        test: /\.m?js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ['@babel/preset-env']
-          }
-        }
-      },
-      {
-        test: /\.ts$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ['@babel/preset-env','@babel/preset-typescript']
-          }
-        }
-      },
-    ]
-  }
-}
-const webpackConfigTest = new WebpackConfig(webpackConfig)
+const webpackConfigTest = new WebpackConfig()
 export default webpackConfigTest.getConfig()
