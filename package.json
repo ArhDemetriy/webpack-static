@@ -4,8 +4,8 @@
   "description": "",
   "private": true,
   "scripts": {
-    "webpack": "webpack",
-    "dev": "cross-env NODE_ENV=development webpack >source.log",
+    "webpack": "webpack --config webpack.config.ts",
+    "dev": "cross-env NODE_ENV=development && webpack",
     "tsdev": "cross-env NODE_ENV=development webpack --config webpack.config.ts",
     "prod": "cross-env NODE_ENV=production webpack",
     "start": "cross-env NODE_ENV=development webpack serve",
@@ -18,22 +18,20 @@
     "url": "git+https://github.com/ArhDemetriy/webpak.git"
   },
   "author": "ArhDemetriy <ArhDemetriy@GMail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/ArhDemetriy/webpak/issues"
   },
   "homepage": "https://github.com/ArhDemetriy/webpak#readme",
   "browserslist": "> 0.25%, not dead",
   "jest": {
-    "preset": "ts-jest",
-    "collectCoverage": true,
-    "coverageReporters": [
-      "html"
-    ]
+    "preset": "ts-jest"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/preset-env": "^7.12.11",
+    "@babel/cli": "^7.13.10",
+    "@babel/core": "^7.13.10",
+    "@babel/node": "^7.13.12",
+    "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.12.7",
     "@types/jest": "^26.0.20",
     "@types/jquery": "^3.5.5",

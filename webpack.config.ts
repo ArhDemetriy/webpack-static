@@ -105,7 +105,7 @@ class WebpackConfigModule {
   }
   protected getRuleForAutoImportsLoader(importExprGenerator: (importPath: string) => string, ext: string, fileName: string = 'imports') {
     const autoImportsLoaderOptions: AutoInputOptions = {
-      sources: ['src/components/complicated', 'src/components/simple',],
+      sources: (['src/components/complicated', 'src/components/simple',]as any),
       startImportFileName: `${fileName}.json`,
       parsedImportFilesGenerators: new Map([
         [`${fileName}${ext}`, importExprGenerator],
@@ -115,6 +115,7 @@ class WebpackConfigModule {
     const rule: RuleSetRule = { use: [] };
     (rule.use as RuleSetUseItem[]).push({
       loader: 'auto-imports-loader',
+      // loader: 'auto-imports-loader/auto-imports-loader.ts',
       options: autoImportsLoaderOptions,
     })
 
