@@ -6,12 +6,12 @@
   "scripts": {
     "webpack": "webpack --config webpack.config.ts",
     "dev": "cross-env NODE_ENV=development && webpack",
-    "tsdev": "cross-env NODE_ENV=development webpack --config webpack.config.ts",
-    "prod": "cross-env NODE_ENV=production webpack",
-    "start": "cross-env NODE_ENV=development webpack serve",
+    "prod": "cross-env NODE_ENV=production && webpack",
+    "start": "cross-env NODE_ENV=development && webpack serve",
+    "test": "jest",
     "testWatch": "jest --watch",
-    "test1": "jest auto-input-loader/core/__tests__/PartitionImports.test.ts --watch",
-    "test": "jest auto-input-loader/core/__tests__/ParserResolves.test.ts"
+    "test1":  "jest src/components/q/__tests__/q.test.ts",
+    "test1w": "jest src/components/q/__tests__/q.test.ts --watch"
   },
   "repository": {
     "type": "git",
