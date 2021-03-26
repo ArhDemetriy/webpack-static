@@ -187,13 +187,23 @@ class WebpackConfig {
     this.config.module = moduleGenerator.getModule()
   }
   protected setPlugins() {
-    const name = 'index'
+    let name = 'index'
     const HWPSetup : HTMLWebpackPlugin.Options = {
       template: `pages/${name}/${name}.pug`,
       filename: `${name}${this.isDev ? '' : '.[contenthash]'}.html`,
+      chunks: ["main"],
     }
+    name = 'cards'
+    // name.split
+    const HWPSetup1 : HTMLWebpackPlugin.Options = {
+      template: `pages/${name}/${name}.pug`,
+      filename: `${name}${this.isDev ? '' : '.[contenthash]'}.html`,
+      chunks: ["cards"],
+    }
+
     this.config.plugins = [
       new HTMLWebpackPlugin(HWPSetup),
+      new HTMLWebpackPlugin(HWPSetup1),
       new MiniCssExtractPlugin({
         filename: `[name]${this.isDev ? '' : '.[contenthash]'}.css`
       }),
@@ -220,6 +230,7 @@ class WebpackConfig {
   protected setEntry() {
     this.config.entry = {
       main: ['@babel/polyfill', path.resolve(__dirname,'src/pages/index/index.js')],
+      cards: [path.resolve(__dirname,'src/pages/cards/cards.pug')],
     }
   }
   protected setTarget() {
