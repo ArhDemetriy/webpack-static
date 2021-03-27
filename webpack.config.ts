@@ -1,7 +1,10 @@
 /** @type {import('node')} */
 import { Configuration, RuleSetRule, RuleSetUseItem } from "webpack"
+import { AutoInputOptions } from "auto-imports-loader/types";
 
 import path = require('path')
+import { readdirSync } from 'fs'
+
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import CopyWebpackPlugin = require('copy-webpack-plugin')
 import HTMLWebpackPlugin = require('html-webpack-plugin')
@@ -9,9 +12,13 @@ import MiniCssExtractPlugin = require('mini-css-extract-plugin')
 import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 import TerserWebpackPlugin = require('terser-webpack-plugin')
 
-import { AutoInputOptions } from "auto-imports-loader/types";
-
+/**
+ * generate Configuration.module
+ */
 class WebpackConfigModule {
+  /**
+   * @return {Configuration['module']} Configuration.module
+   */
   getModule() {
     return this.module
   }
@@ -90,7 +97,10 @@ class WebpackConfigModule {
     const ruleForAutoImports: RuleSetRule = this.getRuleForAutoImportsLoader(pugImportsExprGenerator, '.pug')
     const pugRule: RuleSetRule = this.getPugRule()
 
-    ruleForAutoImports.use = (pugRule.use as RuleSetUseItem[]).concat(ruleForAutoImports.use)
+    ruleForAutoImports.use = [].concat(
+      (pugRule.use as RuleSetUseItem[]),
+      ruleForAutoImports.use,
+    )
 
     return Object.assign({}, pugRule, ruleForAutoImports)
   }
@@ -115,7 +125,6 @@ class WebpackConfigModule {
     const rule: RuleSetRule = { use: [] };
     (rule.use as RuleSetUseItem[]).push({
       loader: 'auto-imports-loader',
-      // loader: 'auto-imports-loader/auto-imports-loader.ts',
       options: autoImportsLoaderOptions,
     })
 
@@ -130,16 +139,30 @@ class WebpackConfigModule {
 
   protected empty() { }
 }
-
+/**
+ * @param {Configuration} initialConfig
+ * overload self config
+ */
 class WebpackConfig {
+  /**
+   * Object.assign( this.config, initialConfig )
+   * @returns {Configuration} WebpackConfig
+   */
   getConfig() {
     return Object.assign({}, this.config, this.initialConfig)
   }
   private readonly config: Configuration = {}
   protected readonly isDev = process.env.NODE_ENV == 'development'
   protected readonly initialConfig: Configuration
+  // имя этого каталога используется в нескольких методах, потому вынес в отдельную переменную
+  // name of this dir is using in many methods, so i transfer him in this var
+  protected readonly pagesDir = 'pages'
+  protected readonly pages: string[]
   constructor(config?: Configuration) {
     this.initialConfig = config || {}
+    this.pages = this.getDirectoriesInPages()
+
+    // webpack config generation
     this.setMode()
     this.setOptimization()
     this.setModule()
@@ -159,7 +182,7 @@ class WebpackConfig {
       splitChunks: {
         chunks: 'all',
         maxInitialRequests: 100,
-        minSize: 1000,
+        minSize: 0,
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
@@ -186,51 +209,64 @@ class WebpackConfig {
     const moduleGenerator = new WebpackConfigModule()
     this.config.module = moduleGenerator.getModule()
   }
+  protected getHTMLWebpackPluginOptions(pageName: string): HTMLWebpackPlugin.Options {
+    const HWPSetup: HTMLWebpackPlugin.Options = {
+      template: `${this.pagesDir}/${pageName}/${pageName}.pug`,
+      // не использовать поля класса, например this.pagesDir. Это результирующий файл, его каталог не то-же самое что каталоги в src.
+      filename: `${pageName}.html`,
+      scriptLoading: 'defer',
+      title: pageName,
+      showErrors: this.isDev,
+      // favicon: path.resolve(__dirname, 'src',),
+      // chunks: [pageName],
+    }
+    return HWPSetup
+  }
+  protected getHTMLWebpackPluginsForAllPages(): Configuration['plugins']{
+    const HWPs = this.pages.map(pageName => {
+      const options = this.getHTMLWebpackPluginOptions(pageName)
+      return new HTMLWebpackPlugin(options)
+    })
+    return HWPs
+  }
   protected setPlugins() {
-    let name = 'index'
-    const HWPSetup : HTMLWebpackPlugin.Options = {
-      template: `pages/${name}/${name}.pug`,
-      filename: `${name}${this.isDev ? '' : '.[contenthash]'}.html`,
-      chunks: ["main"],
-    }
-    name = 'cards'
-    // name.split
-    const HWPSetup1 : HTMLWebpackPlugin.Options = {
-      template: `pages/${name}/${name}.pug`,
-      filename: `${name}${this.isDev ? '' : '.[contenthash]'}.html`,
-      chunks: ["cards"],
-    }
-
-    this.config.plugins = [
-      new HTMLWebpackPlugin(HWPSetup),
-      new HTMLWebpackPlugin(HWPSetup1),
-      new MiniCssExtractPlugin({
-        filename: `[name]${this.isDev ? '' : '.[contenthash]'}.css`
-      }),
-      new CleanWebpackPlugin(),
-    ]
+    this.config.plugins = [].concat(
+      [
+        new MiniCssExtractPlugin({
+          filename: `styles/[name]${this.isDev ? '' : '.[contenthash]'}.css`,
+        }),
+        new CleanWebpackPlugin(),
+      ],
+      this.getHTMLWebpackPluginsForAllPages(),
+    )
   }
   protected setResolve() {
+    const alias = {
+      '@simple': path.resolve(__dirname, 'src/components/simple'),
+      '@complicated': path.resolve(__dirname, 'src/components/complicated'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@layouts': path.resolve(__dirname, 'src/layouts'),
+    };
+    // имя этого каталога используется много где, потому вынес в отдельную переменную
+    alias[`@${this.pagesDir}`] = path.resolve(__dirname, 'src', this.pagesDir);
+
     this.config.resolve = {
-      alias: {
-        '@simple': path.resolve(__dirname, 'src/components/simple'),
-        '@complicated': path.resolve(__dirname, 'src/components/complicated'),
-        '@components': path.resolve(__dirname, 'src/components'),
-        '@layouts': path.resolve(__dirname, 'src/layouts'),
-        '@pages': path.resolve(__dirname, 'src/pages'),
-      },
+      alias,
     }
   }
   protected setOutput() {
     this.config.output = {
-      filename: `[name]${this.isDev ? '' : '.[contenthash]'}.js`,
+      filename: `scripts/[name]${this.isDev ? '' : '.[contenthash]'}.js`,
       path: path.resolve(__dirname, 'dist'),
     }
   }
   protected setEntry() {
-    this.config.entry = {
-      main: ['@babel/polyfill', path.resolve(__dirname,'src/pages/index/index.js')],
-      cards: [path.resolve(__dirname,'src/pages/cards/cards.pug')],
+    this.config.entry = {}
+    for (const pageName of this.pages) {
+      this.config.entry[pageName] = [
+        '@babel/polyfill',
+        path.resolve(__dirname, `src/${this.pagesDir}/${pageName}/${pageName}.js`),
+      ]
     }
   }
   protected setTarget() {
@@ -238,6 +274,11 @@ class WebpackConfig {
   }
   protected setContext() {
     this.config.context = path.resolve(__dirname, 'src')
+  }
+  protected getDirectoriesInPages(): string[] {
+    return readdirSync(path.resolve(__dirname, 'src', this.pagesDir), { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name)
   }
   protected setQ() {
     // this.config.q =
