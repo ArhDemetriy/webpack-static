@@ -45,13 +45,28 @@ class WebpackConfigModule {
       'css-loader',
     ]
     cssRule.use = use
+    cssRule.exclude = path.resolve(__dirname, 'src/assets/fonts')
     return cssRule
   }
   protected getScssRule(): RuleSetRule {
     const scssRule: RuleSetRule = this.getCssRule()
     scssRule.test = /\.s[ac]ss$/;
     (scssRule.use as RuleSetUseItem[]).push('sass-loader')
-    return scssRule
+
+    const scssImportsExprGenerator = (importPath: string) => {
+      const beginExpr = "@import '";
+      const endExpr = "';\n";
+      const ideCompatiblyImportPath = importPath.split('\\').join('/')
+      const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
+
+      return beginExpr + scssCompatiblyImportPath + endExpr
+    }
+    const autoImportsRule = this.getRuleForAutoImportsLoader(scssImportsExprGenerator, '.scss')
+
+    const scssAutoImportsRule = scssRule // Object.assign({}, autoImportsRule, scssRule)
+    scssAutoImportsRule.use = (scssRule.use as RuleSetUseItem[]).concat(autoImportsRule.use)
+
+    return scssAutoImportsRule
   }
   protected getJsRule(): RuleSetRule {
     const jsRule: RuleSetRule = {}
@@ -91,8 +106,6 @@ class WebpackConfigModule {
           // require return only name => path gotta in this
           // ticnicly, require(file-loader) returned {default: publickPath + this.name}
           name: (fullPath) => {
-            console.log('******');
-            console.log(fullPath);
             const sourceDirName = path.basename(path.dirname(fullPath)).trim().toLowerCase()
             let dirName = 'img'
             if (sourceDirName == 'ico') {
@@ -113,7 +126,6 @@ class WebpackConfigModule {
         loader: 'pug-loader',
         options: {
           root: path.resolve(__dirname, 'src/components'),
-          basedir: path.resolve(__dirname, 'src/components'),
         }
       },
     ]
