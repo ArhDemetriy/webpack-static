@@ -25,12 +25,15 @@ class WebpackConfigModule {
   private readonly module: Configuration['module'] = { rules: [] }
   protected readonly rules: Configuration['module']['rules'] = this.module.rules
   protected readonly importJsonFileName: string = 'imports'
+  protected readonly isDev: boolean
 
-  constructor() {
+  constructor(isDev: boolean) {
+    this.isDev = isDev
     this.rules.push(this.getJsRule())
     this.rules.push(this.getTsRule())
     this.rules.push(this.getCssRule())
     this.rules.push(this.getScssRule())
+    this.rules.push(this.getImgRule())
     this.rules.push(this.getPugRuleForMainFiles())
     this.rules.push(this.getPugRuleForOtherFiles())
   }
@@ -80,25 +83,22 @@ class WebpackConfigModule {
   protected getImgRule(): RuleSetRule {
     const imgRule: RuleSetRule = {}
     imgRule.test = /\.(png|jpg|svg|gif)$/
+    const name = this.isDev ? '[name]' : '[contenthash]'
     imgRule.use = [
       {
         loader: 'file-loader',
         options: {
-          outputPath: (url, resourcePath, context) => {
-            // `resourcePath` is original absolute path to asset
-            // `context` is directory where stored asset (`rootContext`) or `context` option
-
-            // To get relative path you can use
-            // const relativePath = path.relative(context, resourcePath);
-            const resourceDir = path.dirname(resourcePath).trim().toLowerCase()
-
-            if (resourceDir == 'ico') {
-              return `ico/${url}`
+          // require return only name => path gotta in this
+          // ticnicly, require(file-loader) returned {default: publickPath + this.name}
+          name: (fullPath) => {
+            console.log('******');
+            console.log(fullPath);
+            const sourceDirName = path.basename(path.dirname(fullPath)).trim().toLowerCase()
+            let dirName = 'img'
+            if (sourceDirName == 'ico') {
+              dirName = 'ico'
             }
-            if (resourceDir == 'image') {
-              return `image/${url}`
-            }
-            return `assets/${url}`
+            return `${dirName}/${name}.[ext][query]`
           },
         },
       },
@@ -112,8 +112,8 @@ class WebpackConfigModule {
       {
         loader: 'pug-loader',
         options: {
-          root: path.resolve(__dirname, 'src'),
-          basedir: path.resolve(__dirname, 'src'),
+          root: path.resolve(__dirname, 'src/components'),
+          basedir: path.resolve(__dirname, 'src/components'),
         }
       },
     ]
@@ -234,7 +234,7 @@ class WebpackConfig {
     }
   }
   protected setModule() {
-    const moduleGenerator = new WebpackConfigModule()
+    const moduleGenerator = new WebpackConfigModule(this.isDev)
     this.config.module = moduleGenerator.getModule()
   }
   protected getHTMLWebpackPluginOptions(pageName: string): HTMLWebpackPlugin.Options {
@@ -277,6 +277,7 @@ class WebpackConfig {
       '@complicated': path.resolve(__dirname, 'src/components/complicated'),
       '@components': path.resolve(__dirname, 'src/components'),
       '@layouts': path.resolve(__dirname, 'src/layouts'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
     };
     // имя этого каталога используется много где, потому вынес в отдельную переменную
     alias[`@${this.pagesDir}`] = path.resolve(__dirname, 'src', this.pagesDir);
@@ -289,6 +290,7 @@ class WebpackConfig {
     this.config.output = {
       filename: `scripts/[name]${this.isDev ? '' : '.[contenthash]'}.js`,
       path: path.resolve(__dirname, 'dist'),
+      publicPath: './'
     }
   }
   protected setEntry() {
