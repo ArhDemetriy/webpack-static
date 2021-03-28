@@ -77,6 +77,34 @@ class WebpackConfigModule {
     }).options.presets.push('@babel/preset-typescript')
     return tsRule
   }
+  protected getImgRule(): RuleSetRule {
+    const imgRule: RuleSetRule = {}
+    imgRule.test = /\.(png|jpg|svg|gif)$/
+    imgRule.use = [
+      {
+        loader: 'file-loader',
+        options: {
+          outputPath: (url, resourcePath, context) => {
+            // `resourcePath` is original absolute path to asset
+            // `context` is directory where stored asset (`rootContext`) or `context` option
+
+            // To get relative path you can use
+            // const relativePath = path.relative(context, resourcePath);
+            const resourceDir = path.dirname(resourcePath).trim().toLowerCase()
+
+            if (resourceDir == 'ico') {
+              return `ico/${url}`
+            }
+            if (resourceDir == 'image') {
+              return `image/${url}`
+            }
+            return `assets/${url}`
+          },
+        },
+      },
+    ]
+    return imgRule
+  }
   protected getPugRule(): RuleSetRule {
     const pugRule: RuleSetRule = {}
     pugRule.test = /\.pug$/
@@ -217,7 +245,10 @@ class WebpackConfig {
       scriptLoading: 'defer',
       title: pageName,
       showErrors: this.isDev,
-      // favicon: path.resolve(__dirname, 'src',),
+      favicon: path.resolve(__dirname, 'src/assets/favicon.png',),
+      // TO DO проверить минификацию, если работает без настроек - удалить. Минорно
+      // minify: 'auto',
+      // TO DO выяснить как работает, настроить или удалить. Минорно
       // chunks: [pageName],
     }
     return HWPSetup
@@ -280,6 +311,7 @@ class WebpackConfig {
       .filter(d => d.isDirectory())
       .map(d => d.name)
   }
+  // заготовка под другие настройки
   protected setQ() {
     // this.config.q =
   }

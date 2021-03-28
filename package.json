@@ -10,7 +10,7 @@
     "start": "cross-env NODE_ENV=development npm run webpack serve",
     "test": "jest",
     "testWatch": "jest --watch",
-    "test1":  "jest src/components/q/__tests__/q.test.ts",
+    "test1": "jest src/components/q/__tests__/q.test.ts",
     "test1w": "jest src/components/q/__tests__/q.test.ts --watch"
   },
   "repository": {
