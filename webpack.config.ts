@@ -281,7 +281,7 @@ class WebpackConfig {
         new CleanWebpackPlugin(),
       ],
       this.getHTMLWebpackPluginsForAllPages(),
-    )
+      )
   }
   protected setResolve() {
     const alias = {
