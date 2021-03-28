@@ -1,4 +1,6 @@
- import './index.css'
+import './index.scss'
+import './imports.scss'
+
 
 global.myAversome = function () {
   console.log('gottlich!')
