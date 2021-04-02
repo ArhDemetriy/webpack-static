@@ -13,6 +13,25 @@ import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plu
 import TerserWebpackPlugin = require('terser-webpack-plugin')
 import { Plugin } from "./Plugin/Plugin";
 
+function getImportsExprGenerator() {
+  const scssImportsExprGenerator = (importPath: string) => {
+    const beginExpr = "@import '";
+    const endExpr = "';\n";
+    const ideCompatiblyImportPath = importPath.split('\\').join('/')
+    const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
+
+    return beginExpr + scssCompatiblyImportPath + endExpr
+  }
+  const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
+
+  const importsExprGenerators = new Map() as Map<string, (importPath: string) => string>
+  importsExprGenerators.set('.scss',scssImportsExprGenerator)
+  importsExprGenerators.set('.pug', pugImportsExprGenerator)
+
+  return importsExprGenerators
+}
+
+
 /**
  * generate Configuration.module
  */
@@ -284,10 +303,28 @@ class WebpackConfig {
       this.getHTMLWebpackPluginsForAllPages(),
       new Plugin({
         sources: ['src/components/complicated', 'src/components/simple',],
-        startDirs: this.pages,
+        startDirs: this.pages.map(dirName => path.join('src/pages', dirName)),
         basenameImportFiles: 'imports',
+        importsExprGenerators: this.getImportsExprGenerators()
       })
     )
+  }
+  protected getImportsExprGenerators() {
+    const scssImportsExprGenerator = (importPath: string) => {
+      const beginExpr = "@import '";
+      const endExpr = "';\n";
+      const ideCompatiblyImportPath = importPath.split('\\').join('/')
+      const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
+
+      return beginExpr + scssCompatiblyImportPath + endExpr
+    }
+    const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
+
+    const importsExprGenerators = new Map() as Map<string, (importPath: string) => string>
+    importsExprGenerators.set('.scss',scssImportsExprGenerator)
+    importsExprGenerators.set('.pug', pugImportsExprGenerator)
+
+    return importsExprGenerators
   }
   protected setResolve() {
     const alias = {
