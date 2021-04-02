@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "webpack": "webpack --config webpack.config.ts",
-    "dev": "cross-env NODE_ENV=development npm run webpack",
+    "dev": "cross-env NODE_ENV=development npm run webpack > LOG.log",
     "prod": "cross-env NODE_ENV=production npm run webpack",
     "start": "cross-env NODE_ENV=development npm run webpack serve",
     "test": "jest",

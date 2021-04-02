@@ -11,6 +11,7 @@ import HTMLWebpackPlugin = require('html-webpack-plugin')
 import MiniCssExtractPlugin = require('mini-css-extract-plugin')
 import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 import TerserWebpackPlugin = require('terser-webpack-plugin')
+import { Plugin } from "./Plugin/Plugin";
 
 /**
  * generate Configuration.module
@@ -281,7 +282,12 @@ class WebpackConfig {
         new CleanWebpackPlugin(),
       ],
       this.getHTMLWebpackPluginsForAllPages(),
-      )
+      new Plugin({
+        sources: ['src/components/complicated', 'src/components/simple',],
+        startDirs: this.pages,
+        basenameImportFiles: 'imports',
+      })
+    )
   }
   protected setResolve() {
     const alias = {
