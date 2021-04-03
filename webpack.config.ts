@@ -12,25 +12,6 @@ import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plu
 import TerserWebpackPlugin = require('terser-webpack-plugin')
 import { AutoImportsPlugin } from "./AutoImportsPlugin/AutoImportsPlugin";
 
-function getImportsExprGenerator() {
-  const scssImportsExprGenerator = (importPath: string) => {
-    const beginExpr = "@import '";
-    const endExpr = "';\n";
-    const ideCompatiblyImportPath = importPath.split('\\').join('/')
-    const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
-
-    return beginExpr + scssCompatiblyImportPath + endExpr
-  }
-  const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
-
-  const importsExprGenerators = new Map() as Map<string, (importPath: string) => string>
-  importsExprGenerators.set('.scss',scssImportsExprGenerator)
-  importsExprGenerators.set('.pug', pugImportsExprGenerator)
-
-  return importsExprGenerators
-}
-
-
 /**
  * generate Configuration.module
  */
@@ -101,25 +82,18 @@ class WebpackConfigModule {
   }
   protected getImgRule(): RuleSetRule {
     const imgRule: RuleSetRule = {}
-    imgRule.test = /\.(png|jpg|svg|gif)$/
+    imgRule.test = /\.(png|jpg|svg|gif|svg)$/
+    imgRule.type = 'asset/resource'
     const name = this.isDev ? '[name]' : '[contenthash]'
-    imgRule.use = [
-      {
-        loader: 'file-loader',
-        options: {
-          // require return only name => path gotta in this
-          // ticnicly, require(file-loader) returned {default: publickPath + this.name}
-          name: (fullPath) => {
-            const sourceDirName = path.basename(path.dirname(fullPath)).trim().toLowerCase()
-            let dirName = 'img'
-            if (sourceDirName == 'ico') {
-              dirName = 'ico'
-            }
-            return `${dirName}/${name}.[ext][query]`
-          },
-        },
-      },
-    ]
+    imgRule.generator = {
+      filename: (options) => {
+        let dirName = 'img'
+        if ('ico' == path.basename(path.dirname(options.filename)).trim().toLowerCase()) {
+          dirName = 'ico'
+        }
+        return `${dirName}/${name}[ext]`
+      }
+    }
     return imgRule
   }
   protected getPugRule(): RuleSetRule {
