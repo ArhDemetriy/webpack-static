@@ -11,6 +11,26 @@ import HTMLWebpackPlugin = require('html-webpack-plugin')
 import MiniCssExtractPlugin = require('mini-css-extract-plugin')
 import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 import TerserWebpackPlugin = require('terser-webpack-plugin')
+import { AutoImportsPlugin } from "./AutoImportsPlugin/AutoImportsPlugin";
+
+function getImportsExprGenerator() {
+  const scssImportsExprGenerator = (importPath: string) => {
+    const beginExpr = "@import '";
+    const endExpr = "';\n";
+    const ideCompatiblyImportPath = importPath.split('\\').join('/')
+    const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
+
+    return beginExpr + scssCompatiblyImportPath + endExpr
+  }
+  const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
+
+  const importsExprGenerators = new Map() as Map<string, (importPath: string) => string>
+  importsExprGenerators.set('.scss',scssImportsExprGenerator)
+  importsExprGenerators.set('.pug', pugImportsExprGenerator)
+
+  return importsExprGenerators
+}
+
 
 /**
  * generate Configuration.module
@@ -25,14 +45,16 @@ class WebpackConfigModule {
   private readonly module: Configuration['module'] = { rules: [] }
   protected readonly rules: Configuration['module']['rules'] = this.module.rules
   protected readonly importJsonFileName: string = 'imports'
+  protected readonly isDev: boolean
 
-  constructor() {
+  constructor(isDev: boolean) {
+    this.isDev = isDev
     this.rules.push(this.getJsRule())
     this.rules.push(this.getTsRule())
     this.rules.push(this.getCssRule())
     this.rules.push(this.getScssRule())
-    this.rules.push(this.getPugRuleForMainFiles())
-    this.rules.push(this.getPugRuleForOtherFiles())
+    this.rules.push(this.getImgRule())
+    this.rules.push(this.getPugRule())
   }
   protected getCssRule(): RuleSetRule {
     const cssRule: RuleSetRule = {}
@@ -42,6 +64,7 @@ class WebpackConfigModule {
       'css-loader',
     ]
     cssRule.use = use
+    cssRule.exclude = path.resolve(__dirname, 'src/assets/fonts')
     return cssRule
   }
   protected getScssRule(): RuleSetRule {
@@ -77,6 +100,29 @@ class WebpackConfigModule {
     }).options.presets.push('@babel/preset-typescript')
     return tsRule
   }
+  protected getImgRule(): RuleSetRule {
+    const imgRule: RuleSetRule = {}
+    imgRule.test = /\.(png|jpg|svg|gif)$/
+    const name = this.isDev ? '[name]' : '[contenthash]'
+    imgRule.use = [
+      {
+        loader: 'file-loader',
+        options: {
+          // require return only name => path gotta in this
+          // ticnicly, require(file-loader) returned {default: publickPath + this.name}
+          name: (fullPath) => {
+            const sourceDirName = path.basename(path.dirname(fullPath)).trim().toLowerCase()
+            let dirName = 'img'
+            if (sourceDirName == 'ico') {
+              dirName = 'ico'
+            }
+            return `${dirName}/${name}.[ext][query]`
+          },
+        },
+      },
+    ]
+    return imgRule
+  }
   protected getPugRule(): RuleSetRule {
     const pugRule: RuleSetRule = {}
     pugRule.test = /\.pug$/
@@ -84,59 +130,12 @@ class WebpackConfigModule {
       {
         loader: 'pug-loader',
         options: {
-          root: path.resolve(__dirname, 'src'),
-          basedir: path.resolve(__dirname, 'src'),
+          root: path.resolve(__dirname, 'src/components'),
         }
       },
     ]
     return pugRule
   }
-  protected getPugRuleForMainFiles(): RuleSetRule {
-    const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
-
-    const ruleForAutoImports: RuleSetRule = this.getRuleForAutoImportsLoader(pugImportsExprGenerator, '.pug')
-    const pugRule: RuleSetRule = this.getPugRule()
-
-    ruleForAutoImports.use = [].concat(
-      (pugRule.use as RuleSetUseItem[]),
-      ruleForAutoImports.use,
-    )
-
-    return Object.assign({}, pugRule, ruleForAutoImports)
-  }
-  protected getPugRuleForOtherFiles(): RuleSetRule {
-    const pugRuleForMainFile: RuleSetRule = this.getPugRuleForMainFiles()
-    const pugRule: RuleSetRule = this.getPugRule()
-
-    pugRule.exclude = pugRuleForMainFile.include
-    pugRule.include = pugRuleForMainFile.exclude
-
-    return pugRule
-  }
-  protected getRuleForAutoImportsLoader(importExprGenerator: (importPath: string) => string, ext: string, fileName: string = 'imports') {
-    const autoImportsLoaderOptions: AutoInputOptions = {
-      sources: (['src/components/complicated', 'src/components/simple',]as any),
-      startImportFileName: `${fileName}.json`,
-      parsedImportFilesGenerators: new Map([
-        [`${fileName}${ext}`, importExprGenerator],
-      ]),
-    }
-
-    const rule: RuleSetRule = { use: [] };
-    (rule.use as RuleSetUseItem[]).push({
-      loader: 'auto-imports-loader',
-      options: autoImportsLoaderOptions,
-    })
-
-    const include: RuleSetRule['include'] = {
-      and: [path.resolve(__dirname, "src/pages")],
-      not: [(s: string) => path.basename(s, path.extname(s)) == fileName],
-    }
-    rule.include = include
-
-    return rule
-  }
-
   protected empty() { }
 }
 /**
@@ -206,7 +205,7 @@ class WebpackConfig {
     }
   }
   protected setModule() {
-    const moduleGenerator = new WebpackConfigModule()
+    const moduleGenerator = new WebpackConfigModule(this.isDev)
     this.config.module = moduleGenerator.getModule()
   }
   protected getHTMLWebpackPluginOptions(pageName: string): HTMLWebpackPlugin.Options {
@@ -217,7 +216,10 @@ class WebpackConfig {
       scriptLoading: 'defer',
       title: pageName,
       showErrors: this.isDev,
-      // favicon: path.resolve(__dirname, 'src',),
+      favicon: path.resolve(__dirname, 'src/assets/favicon.png',),
+      // TO DO проверить минификацию, если работает без настроек - удалить. Минорно
+      // minify: 'auto',
+      // TO DO выяснить как работает, настроить или удалить. Минорно
       // chunks: [pageName],
     }
     return HWPSetup
@@ -238,7 +240,30 @@ class WebpackConfig {
         new CleanWebpackPlugin(),
       ],
       this.getHTMLWebpackPluginsForAllPages(),
+      new AutoImportsPlugin({
+        sources: ['src/components/complicated', 'src/components/simple',],
+        startDirs: this.pages.map(dirName => path.join('src/pages', dirName)),
+        basenameImportFiles: 'imports',
+        importsExprGenerators: this.getImportsExprGenerators()
+      })
     )
+  }
+  protected getImportsExprGenerators() {
+    const scssImportsExprGenerator = (importPath: string) => {
+      const beginExpr = "@import '";
+      const endExpr = "';\n";
+      const ideCompatiblyImportPath = importPath.split('\\').join('/')
+      const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
+
+      return beginExpr + scssCompatiblyImportPath + endExpr
+    }
+    const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
+
+    const importsExprGenerators = new Map() as Map<string, (importPath: string) => string>
+    importsExprGenerators.set('.scss',scssImportsExprGenerator)
+    importsExprGenerators.set('.pug', pugImportsExprGenerator)
+
+    return importsExprGenerators
   }
   protected setResolve() {
     const alias = {
@@ -246,6 +271,7 @@ class WebpackConfig {
       '@complicated': path.resolve(__dirname, 'src/components/complicated'),
       '@components': path.resolve(__dirname, 'src/components'),
       '@layouts': path.resolve(__dirname, 'src/layouts'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
     };
     // имя этого каталога используется много где, потому вынес в отдельную переменную
     alias[`@${this.pagesDir}`] = path.resolve(__dirname, 'src', this.pagesDir);
@@ -258,6 +284,7 @@ class WebpackConfig {
     this.config.output = {
       filename: `scripts/[name]${this.isDev ? '' : '.[contenthash]'}.js`,
       path: path.resolve(__dirname, 'dist'),
+      publicPath: './'
     }
   }
   protected setEntry() {
@@ -280,6 +307,7 @@ class WebpackConfig {
       .filter(d => d.isDirectory())
       .map(d => d.name)
   }
+  // заготовка под другие настройки
   protected setQ() {
     // this.config.q =
   }
