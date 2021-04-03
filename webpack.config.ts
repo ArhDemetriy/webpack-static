@@ -11,7 +11,7 @@ import HTMLWebpackPlugin = require('html-webpack-plugin')
 import MiniCssExtractPlugin = require('mini-css-extract-plugin')
 import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 import TerserWebpackPlugin = require('terser-webpack-plugin')
-import { Plugin } from "./Plugin/Plugin";
+import { AutoImportsPlugin } from "./AutoImportsPlugin/AutoImportsPlugin";
 
 function getImportsExprGenerator() {
   const scssImportsExprGenerator = (importPath: string) => {
@@ -301,7 +301,7 @@ class WebpackConfig {
         new CleanWebpackPlugin(),
       ],
       this.getHTMLWebpackPluginsForAllPages(),
-      new Plugin({
+      new AutoImportsPlugin({
         sources: ['src/components/complicated', 'src/components/simple',],
         startDirs: this.pages.map(dirName => path.join('src/pages', dirName)),
         basenameImportFiles: 'imports',

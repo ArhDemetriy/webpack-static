@@ -13,10 +13,8 @@ type PluginOptions = {
 interface WebpackPlugin{
   apply(compiler: Compiler): void;
 }
-interface Plugin{
-}
 
-class Plugin implements WebpackPlugin, Plugin{
+class AutoImportsPlugin implements WebpackPlugin{
   apply(compiler: Compiler) {
   }
   protected readonly fileSistem: Map<string, Set<string>> = new Map()
@@ -24,7 +22,12 @@ class Plugin implements WebpackPlugin, Plugin{
   protected readonly importsMap: Map<string, Map<string, string[]>>
   protected partitionImports: Promise<ImportNamesCollection>[]
   protected readonly options: PluginOptions
-  constructor(options: PluginOptions) {
+  constructor(options: {
+    sources: string[],
+    startDirs: string[],
+    basenameImportFiles: string,
+    importsExprGenerators: Map<string, (importPath: string) => string>,
+  }) {
     this.options = options
     this.importsMap = new Map(this.options.startDirs.map(startDir => [startDir, new Map()]))
     this.getPartitionImports1()
@@ -115,5 +118,5 @@ class Plugin implements WebpackPlugin, Plugin{
 }
 
 export {
-  Plugin,
+  AutoImportsPlugin,
 }
