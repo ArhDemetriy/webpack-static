@@ -1,6 +1,5 @@
 /** @type {import('node')} */
 import { Configuration, RuleSetRule, RuleSetUseItem } from "webpack"
-import { AutoInputOptions } from "auto-imports-loader/types";
 
 import path = require('path')
 import { readdirSync } from 'fs'
