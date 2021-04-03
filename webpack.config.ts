@@ -54,8 +54,7 @@ class WebpackConfigModule {
     this.rules.push(this.getCssRule())
     this.rules.push(this.getScssRule())
     this.rules.push(this.getImgRule())
-    this.rules.push(this.getPugRuleForMainFiles())
-    this.rules.push(this.getPugRuleForOtherFiles())
+    this.rules.push(this.getPugRule())
   }
   protected getCssRule(): RuleSetRule {
     const cssRule: RuleSetRule = {}
@@ -72,21 +71,7 @@ class WebpackConfigModule {
     const scssRule: RuleSetRule = this.getCssRule()
     scssRule.test = /\.s[ac]ss$/;
     (scssRule.use as RuleSetUseItem[]).push('sass-loader')
-
-    const scssImportsExprGenerator = (importPath: string) => {
-      const beginExpr = "@import '";
-      const endExpr = "';\n";
-      const ideCompatiblyImportPath = importPath.split('\\').join('/')
-      const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
-
-      return beginExpr + scssCompatiblyImportPath + endExpr
-    }
-    const autoImportsRule = this.getRuleForAutoImportsLoader(scssImportsExprGenerator, '.scss')
-
-    const scssAutoImportsRule = scssRule // Object.assign({}, autoImportsRule, scssRule)
-    scssAutoImportsRule.use = (scssRule.use as RuleSetUseItem[]).concat(autoImportsRule.use)
-
-    return scssAutoImportsRule
+    return scssRule
   }
   protected getJsRule(): RuleSetRule {
     const jsRule: RuleSetRule = {}
@@ -151,52 +136,6 @@ class WebpackConfigModule {
     ]
     return pugRule
   }
-  protected getPugRuleForMainFiles(): RuleSetRule {
-    const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
-
-    const ruleForAutoImports: RuleSetRule = this.getRuleForAutoImportsLoader(pugImportsExprGenerator, '.pug')
-    const pugRule: RuleSetRule = this.getPugRule()
-
-    ruleForAutoImports.use = [].concat(
-      (pugRule.use as RuleSetUseItem[]),
-      ruleForAutoImports.use,
-    )
-
-    return Object.assign({}, pugRule, ruleForAutoImports)
-  }
-  protected getPugRuleForOtherFiles(): RuleSetRule {
-    const pugRuleForMainFile: RuleSetRule = this.getPugRuleForMainFiles()
-    const pugRule: RuleSetRule = this.getPugRule()
-
-    pugRule.exclude = pugRuleForMainFile.include
-    pugRule.include = pugRuleForMainFile.exclude
-
-    return pugRule
-  }
-  protected getRuleForAutoImportsLoader(importExprGenerator: (importPath: string) => string, ext: string, fileName: string = 'imports') {
-    const autoImportsLoaderOptions: AutoInputOptions = {
-      sources: (['src/components/complicated', 'src/components/simple',]as any),
-      startImportFileName: `${fileName}.json`,
-      parsedImportFilesGenerators: new Map([
-        [`${fileName}${ext}`, importExprGenerator],
-      ]),
-    }
-
-    const rule: RuleSetRule = { use: [] };
-    (rule.use as RuleSetUseItem[]).push({
-      loader: 'auto-imports-loader',
-      options: autoImportsLoaderOptions,
-    })
-
-    const include: RuleSetRule['include'] = {
-      and: [path.resolve(__dirname, "src/pages")],
-      not: [(s: string) => path.basename(s, path.extname(s)) == fileName],
-    }
-    rule.include = include
-
-    return rule
-  }
-
   protected empty() { }
 }
 /**
