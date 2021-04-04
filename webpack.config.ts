@@ -1,6 +1,5 @@
 /** @type {import('node')} */
 import { Configuration, RuleSetRule, RuleSetUseItem } from "webpack"
-import { AutoInputOptions } from "auto-imports-loader/types";
 
 import path = require('path')
 import { readdirSync } from 'fs'
@@ -12,25 +11,6 @@ import MiniCssExtractPlugin = require('mini-css-extract-plugin')
 import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 import TerserWebpackPlugin = require('terser-webpack-plugin')
 import { AutoImportsPlugin } from "./AutoImportsPlugin/AutoImportsPlugin";
-
-function getImportsExprGenerator() {
-  const scssImportsExprGenerator = (importPath: string) => {
-    const beginExpr = "@import '";
-    const endExpr = "';\n";
-    const ideCompatiblyImportPath = importPath.split('\\').join('/')
-    const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
-
-    return beginExpr + scssCompatiblyImportPath + endExpr
-  }
-  const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
-
-  const importsExprGenerators = new Map() as Map<string, (importPath: string) => string>
-  importsExprGenerators.set('.scss',scssImportsExprGenerator)
-  importsExprGenerators.set('.pug', pugImportsExprGenerator)
-
-  return importsExprGenerators
-}
-
 
 /**
  * generate Configuration.module
@@ -54,6 +34,7 @@ class WebpackConfigModule {
     this.rules.push(this.getCssRule())
     this.rules.push(this.getScssRule())
     this.rules.push(this.getImgRule())
+    this.rules.push(this.getFontsRule())
     this.rules.push(this.getPugRule())
   }
   protected getCssRule(): RuleSetRule {
@@ -64,9 +45,21 @@ class WebpackConfigModule {
       'css-loader',
     ]
     cssRule.use = use
-    cssRule.exclude = path.resolve(__dirname, 'src/assets/fonts')
+    // cssRule.exclude = path.resolve(__dirname, 'src/assets/fonts')
     return cssRule
   }
+  protected getCssRule1(): RuleSetRule {
+    const cssRule: RuleSetRule = {}
+    cssRule.test = /\.css$/
+    const use: RuleSetUseItem[] = [
+      MiniCssExtractPlugin.loader,
+      'css-loader',
+    ]
+    cssRule.use = use
+    cssRule.include = path.resolve(__dirname, 'src/assets/fonts')
+    return cssRule
+  }
+
   protected getScssRule(): RuleSetRule {
     const scssRule: RuleSetRule = this.getCssRule()
     scssRule.test = /\.s[ac]ss$/;
@@ -102,25 +95,32 @@ class WebpackConfigModule {
   }
   protected getImgRule(): RuleSetRule {
     const imgRule: RuleSetRule = {}
-    imgRule.test = /\.(png|jpg|svg|gif)$/
+    imgRule.test = /\.(png|jpg|svg|gif|svg)$/
+    imgRule.type = 'asset/resource'
+    imgRule.exclude = path.resolve(__dirname, 'src/assets/fonts')
     const name = this.isDev ? '[name]' : '[contenthash]'
-    imgRule.use = [
-      {
-        loader: 'file-loader',
-        options: {
-          // require return only name => path gotta in this
-          // ticnicly, require(file-loader) returned {default: publickPath + this.name}
-          name: (fullPath) => {
-            const sourceDirName = path.basename(path.dirname(fullPath)).trim().toLowerCase()
-            let dirName = 'img'
-            if (sourceDirName == 'ico') {
-              dirName = 'ico'
-            }
-            return `${dirName}/${name}.[ext][query]`
-          },
-        },
-      },
-    ]
+    imgRule.generator = {
+      filename: (options) => {
+        let dirName = 'img'
+        if ('ico' == path.basename(path.dirname(options.filename)).trim().toLowerCase()) {
+          dirName = 'ico'
+        }
+        return `${dirName}/${name}[ext]`
+      }
+    }
+    return imgRule
+  }
+  protected getFontsRule(): RuleSetRule {
+    const imgRule: RuleSetRule = {}
+    imgRule.test = /\.(svg|ttf|eot|woff|woff2)$/
+    imgRule.type = 'asset/resource'
+    imgRule.include = path.resolve(__dirname, 'src/assets/fonts')
+    imgRule.generator = {
+      filename: (options) => {
+        const dirName = path.basename(path.dirname(options.filename)).trim()
+        return `fonts/${dirName}/[name][ext]`
+      }
+    }
     return imgRule
   }
   protected getPugRule(): RuleSetRule {
