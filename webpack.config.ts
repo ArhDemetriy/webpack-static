@@ -1,5 +1,5 @@
 /** @type {import('node')} */
-import { Configuration, RuleSetRule, RuleSetUseItem } from "webpack"
+import { Configuration, RuleSetRule, RuleSetUseItem, webpack, WebpackError , ProvidePlugin} from "webpack"
 
 import path = require('path')
 import { readdirSync } from 'fs'
@@ -11,6 +11,9 @@ import MiniCssExtractPlugin = require('mini-css-extract-plugin')
 import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 import TerserWebpackPlugin = require('terser-webpack-plugin')
 import { AutoImportsPlugin } from "./AutoImportsPlugin/AutoImportsPlugin";
+
+import * as jQuery from "jQuery";
+
 
 /**
  * generate Configuration.module
@@ -228,13 +231,16 @@ class WebpackConfig {
   }
   protected setPlugins() {
     this.config.plugins = [].concat(
-      [
-        new MiniCssExtractPlugin({
-          filename: `styles/[name]${this.isDev ? '' : '.[contenthash]'}.css`,
-        }),
-        new CleanWebpackPlugin(),
-      ],
+      new MiniCssExtractPlugin({
+        filename: `styles/[name]${this.isDev ? '' : '.[contenthash]'}.css`,
+      }),
+      new CleanWebpackPlugin(),
+      new ProvidePlugin({
+        '$': 'jQuery',
+        'jQuery': 'jQuery',
+      }),
       this.getHTMLWebpackPluginsForAllPages(),
+
       new AutoImportsPlugin({
         sources: ['src/components/complicated', 'src/components/simple',],
         startDirs: this.pages.map(dirName => path.join('src/pages', dirName)),
