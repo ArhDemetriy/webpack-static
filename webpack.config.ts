@@ -134,6 +134,8 @@ class WebpackConfigModule {
 /**
  * @param {Configuration} initialConfig
  * overload self config
+ * @example
+ * webpackConfig = new WebpackConfig()
  */
 class WebpackConfig {
   /**
