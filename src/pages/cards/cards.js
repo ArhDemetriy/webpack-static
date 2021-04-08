@@ -1,5 +1,5 @@
 "use strict"
-import './imports.scss';
+import './imports.js';
 import '@layouts/base.js';
 
 import './cards.scss';
