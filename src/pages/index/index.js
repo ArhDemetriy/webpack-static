@@ -1,5 +1,5 @@
 import './index.scss'
-import './imports.scss'
+import './imports.js'
 import '@layouts/base.js';
 
 

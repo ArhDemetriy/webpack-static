@@ -14,10 +14,13 @@ import { AutoImportsPlugin } from "./AutoImportsPlugin/AutoImportsPlugin";
 
 /**
  * generate Configuration.module
+ * @param {boolean} isDev boolean
+ * @example
+ * webpackConfig.module = (new WebpackConfigModule(isDev)).getModule()
  */
 class WebpackConfigModule {
   /**
-   * @return {Configuration['module']} Configuration.module
+   * @return {import("webpack").Configuration['module']} Configuration.module
    */
   getModule() {
     return this.module
@@ -26,16 +29,19 @@ class WebpackConfigModule {
   protected readonly rules: Configuration['module']['rules'] = this.module.rules
   protected readonly importJsonFileName: string = 'imports'
   protected readonly isDev: boolean
-
+  /**
+   * @param {boolean} isDev
+   * @constructor
+   */
   constructor(isDev: boolean) {
     this.isDev = isDev
     this.rules.push(this.getJsRule())
     this.rules.push(this.getTsRule())
     this.rules.push(this.getCssRule())
     this.rules.push(this.getScssRule())
+    this.rules.push(this.getPugRule())
     this.rules.push(this.getImgRule())
     this.rules.push(this.getFontsRule())
-    this.rules.push(this.getPugRule())
   }
   protected getCssRule(): RuleSetRule {
     const cssRule: RuleSetRule = {}
@@ -45,21 +51,8 @@ class WebpackConfigModule {
       'css-loader',
     ]
     cssRule.use = use
-    // cssRule.exclude = path.resolve(__dirname, 'src/assets/fonts')
     return cssRule
   }
-  protected getCssRule1(): RuleSetRule {
-    const cssRule: RuleSetRule = {}
-    cssRule.test = /\.css$/
-    const use: RuleSetUseItem[] = [
-      MiniCssExtractPlugin.loader,
-      'css-loader',
-    ]
-    cssRule.use = use
-    cssRule.include = path.resolve(__dirname, 'src/assets/fonts')
-    return cssRule
-  }
-
   protected getScssRule(): RuleSetRule {
     const scssRule: RuleSetRule = this.getCssRule()
     scssRule.test = /\.s[ac]ss$/;
@@ -111,17 +104,17 @@ class WebpackConfigModule {
     return imgRule
   }
   protected getFontsRule(): RuleSetRule {
-    const imgRule: RuleSetRule = {}
-    imgRule.test = /\.(svg|ttf|eot|woff|woff2)$/
-    imgRule.type = 'asset/resource'
-    imgRule.include = path.resolve(__dirname, 'src/assets/fonts')
-    imgRule.generator = {
+    const fontsRule: RuleSetRule = {}
+    fontsRule.test = /\.(svg|ttf|eot|woff|woff2)$/
+    fontsRule.type = 'asset/resource'
+    fontsRule.include = path.resolve(__dirname, 'src/assets/fonts')
+    fontsRule.generator = {
       filename: (options) => {
         const dirName = path.basename(path.dirname(options.filename)).trim()
         return `fonts/${dirName}/[name][ext]`
       }
     }
-    return imgRule
+    return fontsRule
   }
   protected getPugRule(): RuleSetRule {
     const pugRule: RuleSetRule = {}
@@ -257,11 +250,14 @@ class WebpackConfig {
 
       return beginExpr + scssCompatiblyImportPath + endExpr
     }
+
+    const jsImportsExprGenerator = (importPath: string) => `import '${importPath.split('\\').join('/')}';\n`;
     const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
 
     const importsExprGenerators = new Map() as Map<string, (importPath: string) => string>
-    importsExprGenerators.set('.scss',scssImportsExprGenerator)
+    // importsExprGenerators.set('.scss',scssImportsExprGenerator)
     importsExprGenerators.set('.pug', pugImportsExprGenerator)
+    importsExprGenerators.set('.js', jsImportsExprGenerator)
 
     return importsExprGenerators
   }
