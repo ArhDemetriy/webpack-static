@@ -250,6 +250,7 @@ class WebpackConfig {
     )
   }
   protected getImportsExprGenerators() {
+    // TODO убедиться что импортов через js достаточно. удалить. минорно.
     const scssImportsExprGenerator = (importPath: string) => {
       const beginExpr = "@import '";
       const endExpr = "';\n";
@@ -266,6 +267,7 @@ class WebpackConfig {
     // importsExprGenerators.set('.scss',scssImportsExprGenerator)
     importsExprGenerators.set('.pug', pugImportsExprGenerator)
     importsExprGenerators.set('.js', jsImportsExprGenerator)
+    importsExprGenerators.set('.ts', jsImportsExprGenerator)
 
     return importsExprGenerators
   }
