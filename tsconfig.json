@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     // "target": "ESNext",
-    "lib": ["es2020","ESNext"],
+    "lib": ["es2020","ESNext","DOM"],
     // "allowSyntheticDefaultImports": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
   }
 }

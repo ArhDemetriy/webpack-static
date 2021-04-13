@@ -1,8 +1,7 @@
+import '@layouts/base.js'
 import './index.scss'
 import './imports.js'
-import '@layouts/base.js';
-
-
+import './imports.ts'
 
 global.myAversome = function () {
   console.log('gottlich!')
