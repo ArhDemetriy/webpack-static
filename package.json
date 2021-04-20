@@ -5,9 +5,10 @@
   "private": true,
   "scripts": {
     "webpack": "webpack --config webpack.config.ts",
+    "webpackServe": "webpack serve --config webpack.config.ts",
     "dev": "cross-env NODE_ENV=development npm run webpack",
     "prod": "cross-env NODE_ENV=production npm run webpack",
-    "start": "cross-env NODE_ENV=development npm run webpack serve",
+    "start": "cross-env NODE_ENV=development npm run webpackServe",
     "test": "jest",
     "testWatch": "jest --watch",
     "test1": "jest src/components/simple/foo/foo.test.ts",
