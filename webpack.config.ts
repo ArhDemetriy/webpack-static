@@ -1,5 +1,5 @@
 /** @type {import('node')} */
-import { Configuration, RuleSetRule, RuleSetUseItem } from "webpack"
+import { Configuration, RuleSetRule, RuleSetUseItem, webpack, WebpackError , ProvidePlugin} from "webpack"
 
 import path = require('path')
 import { readdirSync } from 'fs'
@@ -10,7 +10,10 @@ import HTMLWebpackPlugin = require('html-webpack-plugin')
 import MiniCssExtractPlugin = require('mini-css-extract-plugin')
 import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 import TerserWebpackPlugin = require('terser-webpack-plugin')
-import { AutoImportsPlugin } from "./AutoImportsPlugin/AutoImportsPlugin";
+import { AutoImportsPlugin } from "auto-imports-plugin";
+
+import * as jQuery from "jQuery";
+
 
 /**
  * generate Configuration.module
@@ -228,13 +231,16 @@ class WebpackConfig {
   }
   protected setPlugins() {
     this.config.plugins = [].concat(
-      [
-        new MiniCssExtractPlugin({
-          filename: `styles/[name]${this.isDev ? '' : '.[contenthash]'}.css`,
-        }),
-        new CleanWebpackPlugin(),
-      ],
+      new MiniCssExtractPlugin({
+        filename: `styles/[name]${this.isDev ? '' : '.[contenthash]'}.css`,
+      }),
+      new CleanWebpackPlugin(),
+      new ProvidePlugin({
+        '$': 'jQuery',
+        'jQuery': 'jQuery',
+      }),
       this.getHTMLWebpackPluginsForAllPages(),
+
       new AutoImportsPlugin({
         sources: ['src/components/complicated', 'src/components/simple',],
         startDirs: this.pages.map(dirName => path.join('src/pages', dirName)),
@@ -244,6 +250,7 @@ class WebpackConfig {
     )
   }
   protected getImportsExprGenerators() {
+    // TODO убедиться что импортов через js достаточно. удалить. минорно.
     const scssImportsExprGenerator = (importPath: string) => {
       const beginExpr = "@import '";
       const endExpr = "';\n";
@@ -260,6 +267,7 @@ class WebpackConfig {
     // importsExprGenerators.set('.scss',scssImportsExprGenerator)
     importsExprGenerators.set('.pug', pugImportsExprGenerator)
     importsExprGenerators.set('.js', jsImportsExprGenerator)
+    importsExprGenerators.set('.ts', jsImportsExprGenerator)
 
     return importsExprGenerators
   }
