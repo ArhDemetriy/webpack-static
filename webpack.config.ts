@@ -250,24 +250,14 @@ class WebpackConfig {
     )
   }
   protected getImportsExprGenerators() {
-    // TODO убедиться что импортов через js достаточно. удалить. минорно.
-    const scssImportsExprGenerator = (importPath: string) => {
-      const beginExpr = "@import '";
-      const endExpr = "';\n";
-      const ideCompatiblyImportPath = importPath.split('\\').join('/')
-      const scssCompatiblyImportPath = ideCompatiblyImportPath.slice(ideCompatiblyImportPath.indexOf('src/'))
-
-      return beginExpr + scssCompatiblyImportPath + endExpr
-    }
-
-    const jsImportsExprGenerator = (importPath: string) => `import '${importPath.split('\\').join('/')}';\n`;
     const pugImportsExprGenerator = (importPath: string) => `include ${importPath.split('\\').join('/')}\n`
+    const jsImportsExprGenerator = (importPath: string) => `import '${importPath.split('\\').join('/')}';\n`
+    const tsImportsExprGenerator = jsImportsExprGenerator
 
-    const importsExprGenerators = new Map() as Map<string, (importPath: string) => string>
-    // importsExprGenerators.set('.scss',scssImportsExprGenerator)
+    const importsExprGenerators: ConstructorParameters<typeof AutoImportsPlugin>['0']['importsExprGenerators'] = new Map()
     importsExprGenerators.set('.pug', pugImportsExprGenerator)
     importsExprGenerators.set('.js', jsImportsExprGenerator)
-    importsExprGenerators.set('.ts', jsImportsExprGenerator)
+    importsExprGenerators.set('.ts', tsImportsExprGenerator)
 
     return importsExprGenerators
   }
