@@ -1,17 +1,16 @@
 /** @type {import('node')} */
-import { Configuration, RuleSetRule, RuleSetUseItem, webpack, WebpackError , ProvidePlugin} from "webpack"
+import { Configuration, RuleSetRule, RuleSetUseItem, webpack, WebpackError , ProvidePlugin, HotModuleReplacementPlugin, } from "webpack"
 
 import path = require('path')
 import { readdirSync } from 'fs'
 
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
-import CopyWebpackPlugin = require('copy-webpack-plugin')
 import HTMLWebpackPlugin = require('html-webpack-plugin')
 import MiniCssExtractPlugin = require('mini-css-extract-plugin')
 import OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 import TerserWebpackPlugin = require('terser-webpack-plugin')
+// import WebpackDevServer from "webpack-dev-server";
 import { AutoImportsPlugin } from "auto-imports-plugin";
-
 import * as jQuery from "jQuery";
 
 
@@ -148,15 +147,16 @@ class WebpackConfig {
   getConfig() {
     return Object.assign({}, this.config, this.initialConfig)
   }
-  private readonly config: Configuration = {}
-  protected readonly isDev = process.env.NODE_ENV == 'development'
+  protected readonly config: Configuration = {}
+  protected readonly isDev: boolean
   protected readonly initialConfig: Configuration
   // имя этого каталога используется в нескольких методах, потому вынес в отдельную переменную
   // name of this dir is using in many methods, so i transfer him in this var
   protected readonly pagesDir = 'pages'
   protected readonly pages: string[]
-  constructor(config?: Configuration) {
-    this.initialConfig = config || {}
+  constructor(config: Configuration = {}) {
+    this.isDev = this.getIsDev()
+    this.initialConfig = config
     this.pages = this.getDirectoriesInPages()
 
     // webpack config generation
@@ -169,6 +169,32 @@ class WebpackConfig {
     this.setEntry()
     this.setTarget()
     this.setContext()
+    this.setServe()
+  }
+  protected getIsDev() {
+    const ENV = process.env.NODE_ENV == 'development'
+    const serve = process.env.npm_lifecycle_event.toLocaleLowerCase().includes('serve')
+    const watch = process.env.npm_lifecycle_event.toLocaleLowerCase().includes('watch')
+    return ENV || serve || watch
+  }
+  protected setDevtool() {
+    if (this.isDev)
+      this.config.devtool = 'source-map';
+  }
+  protected setServe() {
+    if (!process.env.npm_lifecycle_event.toLocaleLowerCase().includes('serve')) return;
+    if (!this.isDev) return
+
+    this.config.watch = false;
+    (this.config as any).devServer = {
+      port: 1234,
+      // historyApiFallback: true,
+      contentBase: path.resolve(__dirname, 'dist'),
+      compress: true,
+      hot: true,
+      index: 'index.html',
+      writeToDisk: true,
+    }
   }
   protected setMode() {
     this.config.mode = this.isDev ? 'development' : 'production'
@@ -229,16 +255,29 @@ class WebpackConfig {
     })
     return HWPs
   }
+  protected getCleanWebpackPlugin() {
+    const options: ConstructorParameters<typeof CleanWebpackPlugin>[0] = {}
+
+    const serve = process.env.npm_lifecycle_event.toLocaleLowerCase().includes('serve')
+    const watch = process.env.npm_lifecycle_event.toLocaleLowerCase().includes('watch')
+    if (serve || watch) {
+      options.cleanStaleWebpackAssets = false
+    }
+
+    return new CleanWebpackPlugin(options)
+  }
   protected setPlugins() {
+
     this.config.plugins = [].concat(
       new MiniCssExtractPlugin({
         filename: `styles/[name]${this.isDev ? '' : '.[contenthash]'}.css`,
       }),
-      new CleanWebpackPlugin(),
+      this.getCleanWebpackPlugin(),
       new ProvidePlugin({
         '$': 'jQuery',
         'jQuery': 'jQuery',
       }),
+      // new HotModuleReplacementPlugin(),
       this.getHTMLWebpackPluginsForAllPages(),
 
       new AutoImportsPlugin({
