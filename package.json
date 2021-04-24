@@ -1,9 +1,11 @@
 {
   "name": "webpak",
   "version": "1.0.0",
-  "description": "",
+  "description": "webpack starter kit",
   "private": true,
   "scripts": {
+    "init": "git worktree add ./gh-pages gh-pages",
+
     "webpack": "webpack --config webpack.config.ts",
     "webpackServe": "webpack serve --config webpack.config.ts",
     "webpackWatch": "webpack --watch --config webpack.config.ts",
@@ -14,9 +16,7 @@
     "start": "cross-env NODE_ENV=development npm run webpackServe",
 
     "test": "jest",
-    "testWatch": "jest --watch",
-    "test1": "jest src/components/simple/foo/foo.test.ts",
-    "test1w": "jest src/components/simple/foo/foo.test.ts --watch"
+    "testWatch": "jest --watch"
   },
   "repository": {
     "type": "git",
