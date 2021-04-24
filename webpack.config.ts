@@ -263,6 +263,9 @@ class WebpackConfig {
     if (serve || watch) {
       options.cleanStaleWebpackAssets = false
     }
+    if (this.isDev) {
+      options.cleanOnceBeforeBuildPatterns = ['*/', '!.git/']
+    }
 
     return new CleanWebpackPlugin(options)
   }
@@ -316,9 +319,19 @@ class WebpackConfig {
     }
   }
   protected setOutput() {
+    let filename = 'scripts/[name]'
+    let outDir = 'dist'
+    if (this.isDev) {
+      outDir += '/dev'
+    } else {
+      filename += '.[contenthash]'
+      outDir += '/prod'
+    }
+    filename += '.js'
+
     this.config.output = {
-      filename: `scripts/[name]${this.isDev ? '' : '.[contenthash]'}.js`,
-      path: path.resolve(__dirname, 'dist'),
+      filename,
+      path: path.resolve(__dirname, outDir),
       publicPath: './'
     }
   }
