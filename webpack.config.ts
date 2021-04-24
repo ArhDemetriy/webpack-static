@@ -6,7 +6,6 @@ import { readdirSync } from 'fs';
 
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import { AutoImportsPlugin } from 'auto-imports-plugin';
-import * as jQuery from 'jQuery';
 
 import path = require('path');
 import HTMLWebpackPlugin = require('html-webpack-plugin');
@@ -42,13 +41,13 @@ class WebpackConfigModule {
    */
   constructor(isDev: boolean) {
     this.isDev = isDev;
-    this.rules.push(this.getJsRule());
-    this.rules.push(this.getTsRule());
-    this.rules.push(this.getCssRule());
-    this.rules.push(this.getScssRule());
-    this.rules.push(this.getPugRule());
-    this.rules.push(this.getImgRule());
-    this.rules.push(this.getFontsRule());
+    this.setCssRule();
+    this.setScssRule();
+    this.setJsRule();
+    this.setTsRule();
+    this.setPugRule();
+    this.setImgRule();
+    this.setFontsRule();
   }
 
   protected getCssRule(): RuleSetRule {
@@ -62,11 +61,15 @@ class WebpackConfigModule {
     return cssRule;
   }
 
-  protected getScssRule(): RuleSetRule {
+  protected setCssRule() {
+    this.rules.push(this.getCssRule());
+  }
+
+  protected setScssRule() {
     const scssRule: RuleSetRule = this.getCssRule();
     scssRule.test = /\.s[ac]ss$/;
     (scssRule.use as RuleSetUseItem[]).push('sass-loader');
-    return scssRule;
+    this.rules.push(scssRule);
   }
 
   protected getJsRule(): RuleSetRule {
@@ -87,7 +90,11 @@ class WebpackConfigModule {
     return jsRule;
   }
 
-  protected getTsRule(): RuleSetRule {
+  protected setJsRule() {
+    this.rules.push(this.getJsRule());
+  }
+
+  protected setTsRule() {
     const tsRule: RuleSetRule = this.getJsRule();
     tsRule.test = /\.ts$/;
     (tsRule.use as {
@@ -97,10 +104,10 @@ class WebpackConfigModule {
     }).options.presets.push(
       '@babel/preset-typescript',
     );
-    return tsRule;
+    this.rules.push(tsRule);
   }
 
-  protected getImgRule(): RuleSetRule {
+  protected setImgRule() {
     const imgRule: RuleSetRule = {};
     imgRule.test = /\.(png|jpg|svg|gif|svg)$/;
     imgRule.type = 'asset/resource';
@@ -109,16 +116,16 @@ class WebpackConfigModule {
     imgRule.generator = {
       filename: (options) => {
         let dirName = 'img';
-        if (path.basename(path.dirname(options.filename)).trim().toLowerCase() == 'ico') {
+        if (path.basename(path.dirname(options.filename)).trim().toLowerCase() === 'ico') {
           dirName = 'ico';
         }
         return `${dirName}/${name}[ext]`;
       },
     };
-    return imgRule;
+    this.rules.push(imgRule);
   }
 
-  protected getFontsRule(): RuleSetRule {
+  protected setFontsRule() {
     const fontsRule: RuleSetRule = {};
     fontsRule.test = /\.(svg|ttf|eot|woff|woff2)$/;
     fontsRule.type = 'asset/resource';
@@ -129,10 +136,10 @@ class WebpackConfigModule {
         return `fonts/${dirName}/[name][ext]`;
       },
     };
-    return fontsRule;
+    this.rules.push(fontsRule);
   }
 
-  protected getPugRule(): RuleSetRule {
+  protected setPugRule() {
     const pugRule: RuleSetRule = {};
     pugRule.test = /\.pug$/;
     pugRule.use = [
@@ -143,10 +150,8 @@ class WebpackConfigModule {
         },
       },
     ];
-    return pugRule;
+    this.rules.push(pugRule);
   }
-
-  protected empty() { }
 }
 /**
  * @param {Configuration} initialConfig
@@ -195,7 +200,7 @@ class WebpackConfig {
   }
 
   protected getIsDev() {
-    const ENV = process.env.NODE_ENV == 'development';
+    const ENV = process.env.NODE_ENV === 'development';
     const serve = process.env.npm_lifecycle_event.toLocaleLowerCase().includes('serve');
     const watch = process.env.npm_lifecycle_event.toLocaleLowerCase().includes('watch');
     return ENV || serve || watch;
@@ -212,7 +217,6 @@ class WebpackConfig {
     this.config.watch = false;
     (this.config as any).devServer = {
       port: 1234,
-      // historyApiFallback: true,
       contentBase: path.resolve(__dirname, 'dist'),
       compress: true,
       hot: true,
@@ -263,7 +267,8 @@ class WebpackConfig {
   protected getHTMLWebpackPluginOptions(pageName: string): HTMLWebpackPlugin.Options {
     const HWPSetup: HTMLWebpackPlugin.Options = {
       template: `${this.pagesDir}/${pageName}/${pageName}.pug`,
-      // не использовать поля класса, например this.pagesDir. Это результирующий файл, его каталог не то-же самое что каталоги в src.
+      // Не использовать поля класса, например this.pagesDir.
+      // Это результирующий файл, его каталог не то-же самое что каталоги в src.
       filename: `${pageName}.html`,
       scriptLoading: 'defer',
       title: pageName,
@@ -383,11 +388,6 @@ class WebpackConfig {
     return readdirSync(path.resolve(__dirname, 'src', this.pagesDir), { withFileTypes: true })
       .filter((d) => d.isDirectory())
       .map((d) => d.name);
-  }
-
-  // заготовка под другие настройки
-  protected setQ() {
-    // this.config.q =
   }
 }
 

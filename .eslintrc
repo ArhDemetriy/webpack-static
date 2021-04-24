@@ -1,8 +1,13 @@
 {
   "parser": "@typescript-eslint/parser",
   "extends": [
-    "airbnb-typescript/base"
+    "airbnb-typescript/base",
+    "plugin:fsd/all"
   ],
+  "rules": {
+    "class-methods-use-this":"warn",
+    "no-restricted-syntax":"warn"
+  },
   "env": {
     "jest": true,
     "browser": true,
