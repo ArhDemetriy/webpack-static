@@ -7,8 +7,6 @@ src/pages/**/import.*
 git-bash.lnk
 package-lock.json
 dist/
-src/components/.def
-src/components/*/.def
 report.*.json
 *.code-workspace
 *.code-workspace
