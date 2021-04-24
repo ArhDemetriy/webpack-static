@@ -1,11 +1,10 @@
 /** @type {import('node')} */
 import {
-  Configuration, RuleSetRule, RuleSetUseItem, webpack, WebpackError, ProvidePlugin, HotModuleReplacementPlugin,
+  Configuration, RuleSetRule, RuleSetUseItem, ProvidePlugin,
 } from 'webpack';
 import { readdirSync } from 'fs';
 
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-// import WebpackDevServer from "webpack-dev-server";
 import { AutoImportsPlugin } from 'auto-imports-plugin';
 import * as jQuery from 'jQuery';
 
