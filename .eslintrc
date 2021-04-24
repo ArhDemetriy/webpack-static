@@ -6,7 +6,8 @@
   ],
   "rules": {
     "class-methods-use-this":"warn",
-    "no-restricted-syntax":"warn"
+    "no-restricted-syntax":"warn",
+    "import/extensions":"off"
   },
   "env": {
     "jest": true,
