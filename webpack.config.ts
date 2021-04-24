@@ -170,6 +170,7 @@ class WebpackConfig {
     this.setTarget()
     this.setContext()
     this.setServe()
+    this.setDevtool()
   }
   protected getIsDev() {
     const ENV = process.env.NODE_ENV == 'development'
