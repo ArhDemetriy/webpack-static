@@ -1,0 +1,20 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "airbnb-typescript/base",
+    "plugin:fsd/all"
+  ],
+  "rules": {
+    "class-methods-use-this":"warn",
+    "no-restricted-syntax":"warn",
+    "import/extensions":"off"
+  },
+  "env": {
+    "jest": true,
+    "browser": true,
+    "node": true
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
+}
