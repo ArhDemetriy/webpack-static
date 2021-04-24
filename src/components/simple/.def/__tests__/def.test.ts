@@ -6,7 +6,6 @@ jest.mock('../def.ts', () => mockModule<{ Def, }>(jest.requireActual('../def.ts'
 
   },
 }))
-
 describe('class Def:', function (this: Def) {
   let def: Def
   beforeEach(() => {
