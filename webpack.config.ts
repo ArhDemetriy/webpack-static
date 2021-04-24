@@ -263,9 +263,6 @@ class WebpackConfig {
     if (serve || watch) {
       options.cleanStaleWebpackAssets = false
     }
-    if (this.isDev) {
-      options.cleanOnceBeforeBuildPatterns = ['*/', '!.git/']
-    }
 
     return new CleanWebpackPlugin(options)
   }
@@ -280,7 +277,6 @@ class WebpackConfig {
         '$': 'jQuery',
         'jQuery': 'jQuery',
       }),
-      // new HotModuleReplacementPlugin(),
       this.getHTMLWebpackPluginsForAllPages(),
 
       new AutoImportsPlugin({
@@ -320,18 +316,14 @@ class WebpackConfig {
   }
   protected setOutput() {
     let filename = 'scripts/[name]'
-    let outDir = 'dist'
-    if (this.isDev) {
-      outDir += '/dev'
-    } else {
+    if (!this.isDev) {
       filename += '.[contenthash]'
-      outDir += '/prod'
     }
     filename += '.js'
 
     this.config.output = {
       filename,
-      path: path.resolve(__dirname, outDir),
+      path: path.resolve(__dirname, 'dist'),
       publicPath: './'
     }
   }
