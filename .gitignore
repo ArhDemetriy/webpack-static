@@ -2,6 +2,7 @@ src/pages/**/imports.*
 !src/pages/**/imports.json
 src/pages/**/import.*
 !src/pages/**/import.json
+gh-pages/
 gh-pages/*
 # temp component folders
 git-bash.lnk
